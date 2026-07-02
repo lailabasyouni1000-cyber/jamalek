@@ -367,13 +367,11 @@
             width: 32px;
             height: 32px;
             border-radius: 50%;
-            background-color: var(--header-plum);
-            color: var(--bg-cream);
+            background-color: #FAF2EA;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 600;
-            font-size: 0.9rem;
+            border: 1px solid var(--border-soft);
         }
 
         .user-name {
@@ -1205,7 +1203,13 @@
             <!-- Profile Info matching Gemini layout -->
             <div class="sidebar-user">
                 <div class="user-info">
-                    <div class="user-avatar">L</div>
+                    <div class="user-avatar" title="Jamalek Beauty Concierge">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--header-plum)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 10h12v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V10z" />
+                            <path d="M9 10V6a3 3 0 0 1 6 0v4" />
+                            <circle cx="12" cy="15" r="1" fill="var(--header-plum)" />
+                        </svg>
+                    </div>
                     <span class="user-name">Laila Basyouni</span>
                 </div>
                 <button class="settings-btn" title="Settings">
