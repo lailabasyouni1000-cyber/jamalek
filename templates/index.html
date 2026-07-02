@@ -1,0 +1,1816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jamalek — جمالك</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-cream: #FAF6F0;
+            --sidebar-bg: #F4EDE2;
+            --header-plum: #2E1A26;
+            --accent-plum: #422637;
+            --text-dark: #1E1219;
+            --card-bg: #FFFFFF;
+            --border-soft: #EFE9DF;
+            --text-muted: #6E5F68;
+            --user-bubble: #2E1A26;
+            --agent-bubble: #F3ECE2;
+            --hover-bg: #EAE2D5;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-cream);
+            color: var(--text-dark);
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* App Layout */
+        .app-layout {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Left Sidebar (Gemini-style, collapsible) */
+        aside.sidebar {
+            width: 260px;
+            height: 100%;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-soft);
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem 1rem;
+            flex-shrink: 0;
+            z-index: 10;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s cubic-bezier(0.4, 0, 0.2, 1), border 0.3s ease;
+            overflow: hidden;
+        }
+
+        aside.sidebar.collapsed {
+            width: 0;
+            padding: 1.5rem 0;
+            border-right: 0 solid transparent;
+        }
+
+        .sidebar-top {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            width: 226px;
+        }
+
+        /* Calligraphy Logo on top left */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .logo-svg-wrapper {
+            position: relative;
+            width: 48px;
+            height: 48px;
+        }
+
+        .logo-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .calligraphy-bg {
+            fill: none;
+            stroke: #E5DCD0;
+            stroke-width: 3.5;
+            stroke-linecap: round;
+        }
+
+        .calligraphy-front {
+            fill: none;
+            stroke: var(--header-plum);
+            stroke-width: 3.5;
+            stroke-linecap: round;
+            transition: stroke 0.4s ease;
+        }
+
+        .diacritic {
+            fill: var(--header-plum);
+            transition: fill 0.4s ease;
+        }
+
+        .blemish {
+            fill: #E27376;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0.85;
+        }
+
+        .wipe-path {
+            fill: none;
+            stroke: #FAF6F0;
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 100;
+            stroke-dashoffset: 100;
+            transition: stroke-dashoffset 0.6s ease-in-out;
+            opacity: 0.9;
+        }
+
+        .blush-glow {
+            fill: #F0B3B5;
+            opacity: 0;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            transform: scale(0.6);
+            transform-origin: center;
+        }
+
+        .logo-container:hover .calligraphy-front { stroke: #B87D82; }
+        .logo-container:hover .diacritic { fill: #B87D82; }
+        .logo-container:hover .blemish { transform: scale(0); opacity: 0; }
+        .logo-container:hover .wipe-path { stroke-dashoffset: 0; animation: wipeAway 0.7s forwards ease-in-out; }
+        .logo-container:hover .blush-glow { opacity: 0.5; transform: scale(1.15); }
+
+        @keyframes wipeAway {
+            0% { stroke-dashoffset: 100; }
+            100% { stroke-dashoffset: -100; }
+        }
+
+        .logo-text-block {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .logo-title-arabic {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+            font-style: italic;
+            color: var(--header-plum);
+            line-height: 1.1;
+            transition: color 0.4s ease;
+        }
+
+        .logo-subtitle-english {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-top: 0.1rem;
+        }
+
+        .logo-container:hover .logo-title-arabic {
+            color: #B87D82;
+            text-shadow: 0 0 10px rgba(184, 125, 130, 0.15);
+        }
+
+        /* Unified Rotating Sidebar Logo */
+        .sidebar-brand-logo-container {
+            position: relative;
+            display: block !important;
+            width: 100%;
+            height: 48px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .sidebar-logo-english-overlay {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%) translateX(0) rotate(0deg);
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            font-style: italic;
+            color: #000000;
+            letter-spacing: 1px;
+            white-space: nowrap;
+            line-height: 1;
+            animation: rotateSidebarTextEnglish 6s infinite ease-in-out;
+        }
+
+        .sidebar-logo-arabic-overlay {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%) translateX(-20px) rotate(-6deg);
+            font-family: 'Aref Ruqaa', serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #000000;
+            white-space: nowrap;
+            line-height: 1;
+            opacity: 0;
+            animation: rotateSidebarTextArabic 6s infinite ease-in-out;
+        }
+
+        @keyframes rotateSidebarTextEnglish {
+            0%, 40% {
+                opacity: 1;
+                transform: translateY(-50%) translateX(0) rotate(0deg);
+            }
+            48%, 90% {
+                opacity: 0;
+                transform: translateY(-50%) translateX(20px) rotate(6deg);
+            }
+            90.1% {
+                opacity: 0;
+                transform: translateY(-50%) translateX(-20px) rotate(-6deg);
+            }
+            98%, 100% {
+                opacity: 1;
+                transform: translateY(-50%) translateX(0) rotate(0deg);
+            }
+        }
+
+        @keyframes rotateSidebarTextArabic {
+            0%, 40% {
+                opacity: 0;
+                transform: translateY(-50%) translateX(-20px) rotate(-6deg);
+            }
+            48%, 90% {
+                opacity: 1;
+                transform: translateY(-50%) translateX(0) rotate(0deg);
+            }
+            98%, 100% {
+                opacity: 0;
+                transform: translateY(-50%) translateX(20px) rotate(6deg);
+            }
+        }
+
+        /* "New chat" button (Gemini style) */
+        .new-chat-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-soft);
+            color: var(--text-dark);
+            padding: 0.8rem 1.2rem;
+            border-radius: 24px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 6px rgba(46, 26, 38, 0.02);
+            width: fit-content;
+        }
+
+        .new-chat-btn:hover {
+            background-color: var(--hover-bg);
+            border-color: var(--border-soft);
+            box-shadow: 0 4px 10px rgba(46, 26, 38, 0.05);
+        }
+
+        .new-chat-btn svg {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+        }
+
+        /* Sidebar sections container */
+        .sidebar-sections {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            overflow-y: auto;
+            width: 226px;
+        }
+
+        .sidebar-section {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            padding-left: 0.6rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.6rem 0.8rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: background 0.2s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar-item:hover {
+            background-color: var(--hover-bg);
+        }
+
+        .sidebar-item svg {
+            width: 16px;
+            height: 16px;
+            fill: none;
+            stroke: var(--text-muted);
+            stroke-width: 2;
+            flex-shrink: 0;
+        }
+
+        /* User Profile in Sidebar */
+        .sidebar-user {
+            border-top: 1px solid var(--border-soft);
+            padding-top: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: auto;
+            width: 226px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: var(--header-plum);
+            color: var(--bg-cream);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .user-name {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .settings-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 0.4rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease;
+        }
+
+        .settings-btn:hover {
+            background-color: var(--hover-bg);
+            color: var(--text-dark);
+        }
+
+        .settings-btn svg {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+        }
+
+        /* Main Chat Window (Gemini layout) */
+        main.chat-window {
+            flex: 1;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: radial-gradient(circle at center, #FAF6F0 0%, #F5EDE1 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Sidebar Toggle Button */
+        .sidebar-toggle-btn {
+            position: absolute;
+            top: 1.2rem;
+            left: 1.2rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 0.6rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease, color 0.2s ease;
+            z-index: 15;
+        }
+
+        .sidebar-toggle-btn:hover {
+            background-color: var(--hover-bg);
+            color: var(--text-dark);
+        }
+
+        .sidebar-toggle-btn svg {
+            width: 22px;
+            height: 22px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+        }
+
+        /* Interactive Cosmic Makeup Space (Disappears on Hover) */
+        .cosmetic-space {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .floating-item {
+            position: absolute;
+            width: 56px;
+            height: 56px;
+            opacity: 0.9;
+            pointer-events: auto; /* Active so user can hover over them */
+            cursor: pointer;
+            filter: drop-shadow(0 4px 10px rgba(46, 26, 38, 0.15));
+            transition: opacity 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Pop/bounce/throw effect on hover */
+        .floating-item:hover {
+            opacity: 1 !important;
+            transform: scale(1.35) translateY(-15px) rotate(20deg) !important;
+            filter: drop-shadow(0 12px 24px rgba(46, 26, 38, 0.25));
+        }
+
+        /* twinking sparkles */
+        .sparkle-star {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            opacity: 0.35;
+            animation: twinkle 3.5s infinite ease-in-out;
+            fill: #B87D82;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.15; transform: scale(0.85); }
+            50% { opacity: 0.65; transform: scale(1.2); }
+        }
+
+        /* Scattered Positions */
+        .pos-1 { top: 18%; left: 8%; animation: cosmeticEntrance 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards, floatAnim 4.2s infinite ease-in-out 1.2s; }
+        .pos-2 { top: 22%; right: 10%; animation: cosmeticEntrance 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s forwards, floatAnim 4.8s infinite ease-in-out 1.3s; }
+        .pos-3 { bottom: 32%; left: 12%; animation: cosmeticEntrance 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s forwards, floatAnim 5.4s infinite ease-in-out 1.4s; }
+        .pos-4 { bottom: 28%; right: 14%; animation: cosmeticEntrance 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s forwards, floatAnim 4.6s infinite ease-in-out 1.5s; }
+        .pos-5 { top: 48%; left: 6%; animation: cosmeticEntrance 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s forwards, floatAnim 5s infinite ease-in-out 1.6s; }
+        .pos-6 { top: 52%; right: 7%; animation: cosmeticEntrance 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.5s forwards, floatAnim 4.4s infinite ease-in-out 1.7s; }
+
+        .star-pos-1 { top: 12%; left: 25%; animation-delay: 0.5s; }
+        .star-pos-2 { top: 35%; right: 28%; animation-delay: 1.2s; }
+        .star-pos-3 { bottom: 42%; left: 30%; animation-delay: 0.2s; }
+        .star-pos-4 { bottom: 15%; right: 35%; animation-delay: 2s; }
+        .star-pos-5 { top: 60%; left: 18%; animation-delay: 0.8s; }
+        .star-pos-6 { top: 15%; right: 18%; animation-delay: 1.5s; }
+
+        @keyframes floatAnim {
+            0% { transform: translateY(0) rotate(0deg); }
+            20% { transform: translateY(-3px) rotate(1deg); }
+            25% { transform: translateY(-14px) rotate(-5deg); } /* Sudden quick lift/pop */
+            45% { transform: translateY(-12px) rotate(-3deg); } /* Slow drift/hang time */
+            70% { transform: translateY(-2px) rotate(1deg); }
+            75% { transform: translateY(6px) rotate(-4deg); } /* Sudden drop/pop */
+            90% { transform: translateY(2px) rotate(-1deg); } /* Slow recovery */
+            100% { transform: translateY(0) rotate(0deg); }
+        }
+
+        @keyframes cosmeticEntrance {
+            0% {
+                opacity: 0;
+                transform: scale(0) rotate(-180deg);
+            }
+            100% {
+                opacity: 0.9;
+                transform: scale(1) rotate(0deg);
+            }
+        }
+
+        /* Center main viewport scroll wrapper */
+        .chat-scroll-wrapper {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            scroll-behavior: smooth;
+            z-index: 2;
+        }
+
+        /* Centered Inner Container */
+        .chat-container {
+            width: 100%;
+            max-width: 760px;
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Initial Greeting State */
+        .welcome-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 8rem 1rem 2rem 1rem;
+            margin: auto;
+            width: 100%;
+            animation: fadeIn 0.8s ease;
+            position: relative;
+        }
+
+        /* Creative Logo & Orbit Styling */
+        .welcome-logo-container {
+            position: relative;
+            display: block;
+            margin: 0 auto 3rem auto;
+            width: 100%;
+            max-width: 500px;
+            height: 110px;
+            z-index: 10;
+        }
+
+        .welcome-logo-english-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 5.5rem;
+            font-weight: 700;
+            font-style: italic;
+            color: #000000; /* Solid Black */
+            letter-spacing: 2px;
+            user-select: none;
+            z-index: 5;
+            white-space: nowrap;
+            line-height: 1;
+            animation: rotateTextEnglish 6s infinite ease-in-out; /* Faster cycle */
+        }
+
+        .welcome-logo-arabic-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Aref Ruqaa', serif;
+            font-size: 5.5rem;
+            font-weight: 700;
+            color: #000000; /* Solid Black */
+            user-select: none;
+            z-index: 5;
+            white-space: nowrap;
+            line-height: 1;
+            animation: rotateTextArabic 6s infinite ease-in-out; /* Faster cycle */
+        }
+
+        /* Orbiting Skincare Products System */
+        .orbiting-item-wrapper {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            pointer-events: none;
+            transform-style: preserve-3d;
+        }
+
+        .orbit-1 {
+            width: 680px;
+            height: 160px;
+            margin-top: -80px;
+            margin-left: -340px;
+            animation: orbitRotation 7.5s infinite linear;
+        }
+
+        .orbit-2 {
+            width: 740px;
+            height: 185px;
+            margin-top: -92.5px;
+            margin-left: -370px;
+            animation: orbitRotation 9.5s infinite linear -3s;
+        }
+
+        .orbit-3 {
+            width: 800px;
+            height: 210px;
+            margin-top: -105px;
+            margin-left: -400px;
+            animation: orbitRotation 11.5s infinite linear -6s;
+        }
+
+        .orbiting-item {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 24px;
+            height: 24px;
+            margin-left: -12px;
+            transform-style: preserve-3d;
+            filter: drop-shadow(0 2px 5px rgba(46, 26, 38, 0.12));
+        }
+
+        .orbiting-item-1 { animation: starCounterRotation 7.5s infinite linear; }
+        .orbiting-item-2 { animation: starCounterRotation 9.5s infinite linear -3s; }
+        .orbiting-item-3 { animation: starCounterRotation 11.5s infinite linear -6s; }
+
+        @keyframes orbitRotation {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes starCounterRotation {
+            0% { transform: rotate(0deg) scale(1.15); }
+            50% { transform: rotate(-180deg) scale(0.65); opacity: 0.45; } /* Fade & shrink at the back */
+            100% { transform: rotate(-360deg) scale(1.15); }
+        }
+
+        @keyframes rotateTextEnglish {
+            0%, 40% {
+                opacity: 1;
+                transform: translate(-50%, -50%) translateX(0) rotate(0deg);
+            }
+            48%, 90% {
+                opacity: 0;
+                transform: translate(-50%, -50%) translateX(30px) rotate(6deg); /* Reduced slide-out for tighter centering */
+            }
+            90.1% {
+                opacity: 0;
+                transform: translate(-50%, -50%) translateX(-30px) rotate(-6deg);
+            }
+            98%, 100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) translateX(0) rotate(0deg);
+            }
+        }
+
+        @keyframes rotateTextArabic {
+            0%, 40% {
+                opacity: 0;
+                transform: translate(-50%, -50%) translateX(-30px) rotate(-6deg);
+            }
+            48%, 90% {
+                opacity: 1;
+                transform: translate(-50%, -50%) translateX(0) rotate(0deg);
+            }
+            98%, 100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) translateX(30px) rotate(6deg);
+            }
+        }
+
+
+
+
+        .welcome-screen h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 3.6rem;
+            font-style: italic;
+            color: var(--header-plum);
+            margin-bottom: 1.8rem;
+            font-weight: 500;
+            background: linear-gradient(135deg, var(--header-plum) 30%, #B87D82 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.3;
+            max-width: 700px;
+            z-index: 5;
+        }
+
+        .welcome-disclaimer {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-size: 0.85rem;
+            color: rgba(46, 26, 38, 0.55);
+            max-width: 480px;
+            margin: -0.5rem auto 2.5rem auto;
+            line-height: 1.5;
+            z-index: 5;
+            text-align: center;
+        }
+
+        /* Gemini-style Floating Glowing Aura Dots representing skincare/makeup */
+        .gemini-glow-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 750px;
+            height: 480px;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.65;
+            mix-blend-mode: multiply;
+            filter: blur(70px);
+            animation: rotateGlow 22s infinite linear;
+        }
+
+        .glow-dot {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(50px);
+            opacity: 0.75;
+        }
+
+        .glow-blush {
+            width: 240px;
+            height: 240px;
+            background-color: #F5C1C3; /* Blush Pink */
+            top: 15%;
+            left: 20%;
+            animation: floatGlow1 8s infinite ease-in-out;
+        }
+
+        .glow-foundation {
+            width: 280px;
+            height: 280px;
+            background-color: #E6BFA3; /* Peach Foundation */
+            bottom: 15%;
+            right: 15%;
+            animation: floatGlow2 10s infinite ease-in-out;
+        }
+
+        .glow-serum {
+            width: 210px;
+            height: 210px;
+            background-color: #DBC5C9; /* Rose Gold Skincare */
+            top: 35%;
+            left: 45%;
+            animation: floatGlow3 9s infinite ease-in-out;
+        }
+
+        .glow-lipstick {
+            width: 200px;
+            height: 200px;
+            background-color: #634658; /* Plum Lipstick */
+            bottom: 25%;
+            left: 15%;
+            animation: floatGlow4 7s infinite ease-in-out;
+        }
+
+        @keyframes floatGlow1 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(30px, -45px) scale(1.12); }
+        }
+        @keyframes floatGlow2 {
+            0%, 100% { transform: translate(0, 0) scale(1.1); }
+            50% { transform: translate(-45px, 30px) scale(0.88); }
+        }
+        @keyframes floatGlow3 {
+            0%, 100% { transform: translate(0, 0) scale(0.9); }
+            50% { transform: translate(25px, 45px) scale(1.15); }
+        }
+        @keyframes floatGlow4 {
+            0%, 100% { transform: translate(0, 0) scale(1.05); }
+            50% { transform: translate(-35px, -25px) scale(0.95); }
+        }
+        @keyframes rotateGlow {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* Message Bubbles - Clean Gemini/Claude Style */
+        .message {
+            display: flex;
+            width: 100%;
+            animation: bubblePop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message.agent {
+            justify-content: flex-start;
+        }
+
+        .bubble {
+            max-width: 85%;
+            padding: 0.75rem 1.15rem;
+            border-radius: 18px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            transition: transform 0.2s ease;
+        }
+
+        .message.user .bubble {
+            background-color: var(--user-bubble);
+            color: var(--bg-cream);
+            border-radius: 18px 18px 4px 18px;
+            box-shadow: 0 4px 14px rgba(46, 26, 38, 0.06);
+        }
+
+        .message.user .bubble:hover {
+            transform: translateY(-1px);
+        }
+
+        .message.agent .bubble {
+            background-color: var(--agent-bubble);
+            color: var(--text-dark);
+            border-radius: 18px 18px 18px 4px;
+            border: 1px solid var(--border-soft);
+            box-shadow: 0 2px 8px rgba(46, 26, 38, 0.01);
+        }
+
+        .message.agent .bubble:hover {
+            transform: translateY(-1px);
+        }
+
+        @keyframes bubblePop {
+            0% { opacity: 0; transform: scale(0.96) translateY(12px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* Rich Structured Cards in Agent Bubbles */
+        .routine-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .routine-column {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.4rem;
+            border: 1px solid var(--border-soft);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.01);
+        }
+
+        .routine-column h4 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.3rem;
+            font-style: italic;
+            color: var(--accent-plum);
+            margin-bottom: 0.8rem;
+            border-bottom: 2px solid var(--bg-cream);
+            padding-bottom: 0.4rem;
+        }
+
+        .routine-step {
+            margin-bottom: 0.8rem;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .routine-step:last-child {
+            margin-bottom: 0;
+        }
+
+        .routine-step-num {
+            font-weight: 600;
+            color: var(--accent-plum);
+        }
+
+        .shade-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.2rem;
+            margin-top: 1rem;
+        }
+
+        .shade-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.4rem;
+            border: 1px solid var(--border-soft);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.01);
+            transition: transform 0.2s ease;
+        }
+
+        .shade-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .shade-badge {
+            display: inline-block;
+            padding: 0.25rem 0.6rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 20px;
+            margin-bottom: 0.6rem;
+        }
+
+        .shade-badge.high-end { background-color: #F8F1FF; color: #7B2CBF; }
+        .shade-badge.mid-range { background-color: #EBF8FF; color: #2B6CB0; }
+        .shade-badge.drugstore { background-color: #E6FFFA; color: #234E52; }
+
+        .shade-card h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.3rem;
+        }
+
+        .shade-brand {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .shade-reason {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Pill-Shaped Centered Input Panel (Modern Gemini Glassmorphism) */
+        .bottom-container {
+            width: 100%;
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 0 1.5rem 1.5rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            z-index: 5;
+        }
+
+        .input-panel {
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-soft);
+            border-radius: 28px;
+            padding: 0.2rem 0.4rem 0.2rem 1.2rem;
+            height: 48px;
+            display: flex;
+            gap: 0.8rem;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(46, 26, 38, 0.03);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        /* Multicolored glowing border gradient on focus */
+        .input-panel::after {
+            content: '';
+            position: absolute;
+            inset: -1.5px;
+            border-radius: 29px;
+            padding: 1.5px;
+            background: linear-gradient(135deg, #B87D82, #2E1A26, #F0B3B5, #C6B3C0);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .input-panel:focus-within {
+            border-color: transparent;
+            box-shadow: 0 8px 32px rgba(46, 26, 38, 0.08);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .input-panel:focus-within::after {
+            opacity: 1;
+        }
+
+        /* Mock utility icons inside input panel */
+        .input-utility-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0.4rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .input-utility-btn:hover {
+            background-color: var(--hover-bg);
+            color: var(--text-dark);
+        }
+
+        .input-utility-btn svg {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2.2;
+            stroke-linecap: round;
+        }
+
+        .input-container {
+            flex: 1;
+        }
+
+        .input-panel textarea {
+            width: 100%;
+            border: none;
+            font-size: 0.95rem;
+            resize: none;
+            height: 24px;
+            font-family: inherit;
+            color: var(--text-dark);
+            background: transparent;
+            outline: none;
+            padding: 0;
+            line-height: 24px;
+            overflow-y: hidden;
+            display: block;
+        }
+
+        .send-btn {
+            background-color: var(--user-bubble);
+            color: var(--bg-cream);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            flex-shrink: 0;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+            background-color: #B87D82;
+        }
+
+        .send-btn svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+            transform: translateX(1px);
+        }
+
+        /* Disclaimer Box at the Very Bottom */
+        .bottom-disclaimer {
+            font-size: 0.72rem;
+            line-height: 1.4;
+            text-align: center;
+            color: var(--text-muted);
+            opacity: 0.85;
+            max-width: 680px;
+            margin: 0 auto;
+        }
+
+        /* Typing indicator */
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 4px 8px;
+            align-items: center;
+            height: 20px;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background-color: var(--text-muted);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1.0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Markdown-like styling inside agent responses */
+        .bubble h2, .bubble h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            margin: 1.2rem 0 0.6rem 0;
+            color: var(--accent-plum);
+        }
+
+        .bubble p {
+            margin-bottom: 0.8rem;
+        }
+
+        .bubble p:last-child {
+            margin-bottom: 0;
+        }
+
+        .bubble ul, .bubble ol {
+            margin-left: 1.5rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .bubble li {
+            margin-bottom: 0.4rem;
+        }
+
+        .highlight-box {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--accent-plum);
+            padding: 0.8rem 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-layout">
+        <!-- Left Sidebar (Collapsed by default) -->
+        <aside class="sidebar collapsed" id="sidebar">
+            <div class="sidebar-top">
+                <a href="/" class="sidebar-brand-logo-container">
+                    <div class="sidebar-logo-english-overlay">Jamalek</div>
+                    <div class="sidebar-logo-arabic-overlay">جمالك</div>
+                </a>
+
+                <button class="new-chat-btn" onclick="startNewChat()">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                    New chat
+                </button>
+            </div>
+
+            <div class="sidebar-sections">
+                <div class="sidebar-section">
+                    <span class="section-title">Recents</span>
+                    <div class="sidebar-item" onclick="usePrompt('I have combination skin, oily T-zone and dry cheeks. I break out before my period.')">
+                        <svg viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        Combination skin assessment
+                    </div>
+                    <div class="sidebar-item" onclick="usePrompt('Build me my complete AM and PM routine.')">
+                        <svg viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        Morning & evening routines
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Info matching Gemini layout -->
+            <div class="sidebar-user">
+                <div class="user-info">
+                    <div class="user-avatar">L</div>
+                    <span class="user-name">Laila Basyouni</span>
+                </div>
+                <button class="settings-btn" title="Settings">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Chat Window (Gemini style) -->
+        <main class="chat-window">
+            <!-- Sidebar toggle button -->
+            <button class="sidebar-toggle-btn" id="sidebarToggle" onclick="toggleSidebar()" title="Toggle Sidebar">
+                <svg viewBox="0 0 24 24">
+                    <path d="M3 12h18M3 6h18M3 18h18"/>
+                </svg>
+            </button>
+
+            <!-- Gemini-style Floating Glowing Aura Dots behind/under main welcome screen -->
+            <div class="gemini-glow-container" id="geminiGlow">
+                <div class="glow-dot glow-blush"></div>
+                <div class="glow-dot glow-foundation"></div>
+                <div class="glow-dot glow-serum"></div>
+                <div class="glow-dot glow-lipstick"></div>
+            </div>
+
+            <!-- Cosmetic Space: Twinkling Space Stars & Floating Makeup Products that disappear on Hover -->
+            <div class="cosmetic-space" id="cosmeticSpace">
+                <!-- Sparkle Stars (8-point golden hand-drawn stars) -->
+                <svg class="sparkle-star star-pos-1" viewBox="0 0 24 24"><path d="M12 2 L14 10 L22 12 L14 14 L12 22 L10 14 L2 12 L10 10 Z" fill="#DDA15E"/></svg>
+                <svg class="sparkle-star star-pos-2" viewBox="0 0 24 24"><path d="M12 2 L14 10 L22 12 L14 14 L12 22 L10 14 L2 12 L10 10 Z" fill="#DDA15E"/></svg>
+                <svg class="sparkle-star star-pos-3" viewBox="0 0 24 24"><path d="M12 2 L14 10 L22 12 L14 14 L12 22 L10 14 L2 12 L10 10 Z" fill="#DDA15E"/></svg>
+                <svg class="sparkle-star star-pos-4" viewBox="0 0 24 24"><path d="M12 2 L14 10 L22 12 L14 14 L12 22 L10 14 L2 12 L10 10 Z" fill="#DDA15E"/></svg>
+                <svg class="sparkle-star star-pos-5" viewBox="0 0 24 24"><path d="M12 2 L14 10 L22 12 L14 14 L12 22 L10 14 L2 12 L10 10 Z" fill="#DDA15E"/></svg>
+                <svg class="sparkle-star star-pos-6" viewBox="0 0 24 24"><path d="M12 2 L14 10 L22 12 L14 14 L12 22 L10 14 L2 12 L10 10 Z" fill="#DDA15E"/></svg>
+            </div>
+
+            <div class="chat-scroll-wrapper" id="chatScrollWrapper">
+                <div class="chat-container" id="chatContainer">
+                    <div class="welcome-screen" id="welcomeScreen">
+                        <div class="welcome-logo-container">
+                            <div class="welcome-logo-english-overlay">Jamalek</div>
+                            <div class="welcome-logo-arabic-overlay">جمالك</div>
+                            
+                            <!-- Orbit 1: Tiny Pink Tube -->
+                            <div class="orbiting-item-wrapper orbit-1">
+                                <div class="orbiting-item orbiting-item-1">
+                                    <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M20 10 L44 10 L40 48 L24 48 Z" fill="#FFC3C8" stroke="#422637" stroke-width="4.5" stroke-linejoin="round"/>
+                                        <path d="M24 48 L40 48 L38 56 L26 56 Z" fill="#DDA15E" stroke="#422637" stroke-width="4.5" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            
+                            <!-- Orbit 2: Tiny Peach Jar -->
+                            <div class="orbiting-item-wrapper orbit-2">
+                                <div class="orbiting-item orbiting-item-2">
+                                    <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M14 26 L50 26 C54 26 56 30 54 48 C52 54 48 56 32 56 C16 56 12 54 10 48 C8 30 10 26 14 26 Z" fill="#FF8E72" stroke="#422637" stroke-width="4.5" stroke-linejoin="round"/>
+                                        <rect x="20" y="14" width="24" height="12" rx="3" fill="#AFAEF0" stroke="#422637" stroke-width="4.5"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            
+                            <!-- Orbit 3: Tiny Lipstick -->
+                            <div class="orbiting-item-wrapper orbit-3">
+                                <div class="orbiting-item orbiting-item-3">
+                                    <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <rect x="22" y="32" width="20" height="24" rx="2" fill="#FF8E72" stroke="#422637" stroke-width="4.5"/>
+                                        <path d="M26 32 L26 18 Q32 14 38 18 L38 32 Z" fill="#FFC3C8" stroke="#422637" stroke-width="4.5" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                        <h2 id="dynamicGreeting" data-profile-greeting="{{ greeting }}">{{ greeting }}</h2>
+                        <div class="welcome-disclaimer">
+                            Jamalak provides personalised beauty guidance only. It is not a medical tool and does not diagnose skin conditions. Always patch test new products and consult a dermatologist for persistent skin concerns.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bottom-container">
+                <div class="input-panel">
+                    <!-- Left Add/Attach Icon matching Gemini -->
+                    <button class="input-utility-btn" title="Add attachments">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                        </svg>
+                    </button>
+                    
+                    <div class="input-container">
+                        <textarea id="userInput" placeholder="Ask Jamalek..." onkeydown="handleKeydown(event)"></textarea>
+                    </div>
+                    
+                    <!-- Send button -->
+                    <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="bottom-disclaimer">
+                    Jamalak provides personalised beauty guidance only. It is not a medical tool and does not diagnose skin conditions. Always patch test new products and consult a dermatologist for persistent skin concerns.
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const chatScrollWrapper = document.getElementById('chatScrollWrapper');
+        const chatContainer = document.getElementById('chatContainer');
+        const userInput = document.getElementById('userInput');
+        const welcomeScreen = document.getElementById('welcomeScreen');
+        const sidebar = document.getElementById('sidebar');
+        const geminiGlow = document.getElementById('geminiGlow');
+        const cosmeticSpace = document.getElementById('cosmeticSpace');
+
+        // Toggle Sidebar state
+        function toggleSidebar() {
+            sidebar.classList.toggle('collapsed');
+        }
+
+        // Set Dynamic Greeting based on time of day or profile
+        function applyGreeting() {
+            const greetingEl = document.getElementById('dynamicGreeting');
+            if (!greetingEl) return;
+            
+            const profileGreeting = greetingEl.getAttribute('data-profile-greeting');
+            if (profileGreeting && profileGreeting.trim() !== "" && !profileGreeting.includes('{' + '{')) {
+                greetingEl.textContent = profileGreeting;
+                return;
+            }
+
+            const hour = new Date().getHours();
+            const morningPhrases = [
+                "Morning beauty! Ready to serve face today?",
+                "Good morning, Laila! +1000 aura points unlocked.",
+                "Morning beauty, Laila! Let's get that hydration prep started, fr.",
+                "Morning, gorgeous! Let's cook that flawless glass-skin base.",
+                "Wake up and glow, Laila! What's on the beauty menu today?",
+                "Good morning, iconic! Time to prep that canvas, very demure, very mindful.",
+                "Morning, beautiful! Ready to give major main character energy?",
+                "Rise and shine, gorgeous! Ready to pamper your skin?",
+                "Good morning, gorgeous! Let's get that morning dewiness going.",
+                "Good morning, Laila! Time to reveal that fresh-faced magic."
+            ];
+            
+            const afternoonPhrases = [
+                "How can I make you look even more iconic today? No notes, Laila.",
+                "Hey Laila, serving glow and leaving no crumbs this afternoon?",
+                "Hey Laila, let's cook up some flawless face rizz.",
+                "How can I make you more beautiful today, gorgeous? Very demure.",
+                "Midday glow check, Laila! What skincare or makeup magic are we working on?",
+                "Let's increase your aura points today, Laila! What are we hunting for?",
+                "Hey gorgeous! Time to level up your beauty routine, fr fr?",
+                "Hey Laila! Ready to find your perfect foundation shade match?",
+                "Let's perfect that sun-kissed routine today.",
+                "Iconic looks only today, Laila! How can I assist your beauty journey?"
+            ];
+            
+            const eveningPhrases = [
+                "Evening beautiful! Ready to restore that aura?",
+                "Double cleanse loading... Very demure, very mindful evening pampering.",
+                "Hey Laila! Time for that PM glow-up, fr fr.",
+                "PM routine check. Let's make sure your skin slays in your sleep.",
+                "Evening, gorgeous! Time to unwind and serve overnight hydration.",
+                "Evening beautiful, Laila! Ready for that night-time glow?",
+                "Time to unwind, gorgeous. What restorative skincare are we discussing tonight?",
+                "Good evening, gorgeous! Let's get that overnight skin repair sorted.",
+                "Pamper session starts now, Laila! Ready to lock in the moisture?",
+                "Good evening, beautiful! Ready to glow in your sleep?"
+            ];
+
+            const getRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+            if (hour >= 5 && hour < 12) {
+                greetingEl.textContent = getRandom(morningPhrases);
+            } else if (hour >= 12 && hour < 17) {
+                greetingEl.textContent = getRandom(afternoonPhrases);
+            } else {
+                greetingEl.textContent = getRandom(eveningPhrases);
+            }
+        }
+
+        // Set up dynamic beauty products list
+        function renderSessionCosmetics() {
+            const cosmeticSpace = document.getElementById('cosmeticSpace');
+            if (!cosmeticSpace) return;
+            
+            // Clear any existing items first to avoid duplication
+            const existingItems = cosmeticSpace.querySelectorAll('.floating-item');
+            existingItems.forEach(item => item.remove());
+
+            const itemsPool = [
+                {
+                    title: "Cleansing Tube",
+                    svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M16 10 L48 10 L44 48 L20 48 Z" fill="#FFC3C8" stroke="#422637" stroke-width="2.5" stroke-linejoin="round"/>
+                        <path d="M17 22 L47 22 L45 32 L19 32 Z" fill="#AFAEF0" stroke="#422637" stroke-width="2.5" stroke-linejoin="round"/>
+                        <circle cx="32" cy="27" r="7" fill="#FAF6F0" stroke="#422637" stroke-width="2"/>
+                        <circle cx="29.5" cy="25.5" r="1.2" fill="#422637"/>
+                        <circle cx="34.5" cy="25.5" r="1.2" fill="#422637"/>
+                        <path d="M29.5 28.5 Q32 31 34.5 28.5" stroke="#422637" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+                        <path d="M20 48 L44 48 L42 56 L22 56 Z" fill="#DDA15E" stroke="#422637" stroke-width="2.5" stroke-linejoin="round"/>
+                        <path d="M28 56 L36 56" stroke="#422637" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>`
+                },
+                {
+                    title: "Peach Cream",
+                    svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M14 26 L50 26 C54 26 56 30 54 44 C52 54 48 56 32 56 C16 56 12 54 10 44 C8 30 10 26 14 26 Z" fill="#FF8E72" stroke="#422637" stroke-width="2.5" stroke-linejoin="round"/>
+                        <rect x="18" y="34" width="28" height="12" rx="2" fill="#FAF6F0" stroke="#422637" stroke-width="2"/>
+                        <circle cx="30" cy="40" r="4" fill="#FFC3C8"/>
+                        <circle cx="34" cy="40" r="4" fill="#FFC3C8"/>
+                        <path d="M32 36 Q34 33 32 32" stroke="#422637" stroke-width="1.5" fill="none"/>
+                        <rect x="18" y="14" width="28" height="12" rx="4" fill="#AFAEF0" stroke="#422637" stroke-width="2.5"/>
+                    </svg>`
+                },
+                {
+                    title: "Lip Gloss",
+                    svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="12" y="24" width="14" height="32" rx="2" fill="#FF8E72" stroke="#422637" stroke-width="2.5"/>
+                        <path d="M12 24 L26 24 L26 32 Q23 28 20 34 Q17 28 14 32 L12 28 Z" fill="#FFC3C8" stroke="#422637" stroke-width="2" stroke-linejoin="round"/>
+                        <rect x="12" y="10" width="14" height="14" rx="2" fill="#AFAEF0" stroke="#422637" stroke-width="2.5"/>
+                        <line x1="46" y1="26" x2="46" y2="44" stroke="#DDA15E" stroke-width="2.5" stroke-linecap="round"/>
+                        <rect x="40" y="44" width="12" height="12" rx="2" fill="#AFAEF0" stroke="#422637" stroke-width="2.5"/>
+                        <path d="M43 20 Q46 14 49 20 Z" fill="#FFC3C8" stroke="#422637" stroke-width="2"/>
+                    </svg>`
+                },
+                {
+                    title: "Lipstick",
+                    svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="22" y="32" width="20" height="24" rx="3" fill="#FF8E72" stroke="#422637" stroke-width="2.5"/>
+                        <rect x="26" y="22" width="12" height="10" fill="#DDA15E" stroke="#422637" stroke-width="2"/>
+                        <path d="M26 22 L26 12 Q32 8 38 12 L38 22 Z" fill="#FFC3C8" stroke="#422637" stroke-width="2.5" stroke-linejoin="round"/>
+                    </svg>`
+                },
+                {
+                    title: "Compact",
+                    svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 40 C12 36, 52 36, 52 40 L46 54 C46 58, 18 58, 18 54 Z" fill="#FF8E72" stroke="#422637" stroke-width="2.5" stroke-linejoin="round"/>
+                        <path d="M14 40 L18 16 Q32 12 46 16 L50 40 Z" fill="#FF8E72" stroke="#422637" stroke-width="2.5" stroke-linejoin="round"/>
+                        <path d="M22 20 L42 20 L44 38 L20 38 Z" fill="#AFAEF0" stroke="#422637" stroke-width="2"/>
+                        <path d="M24 24 L38 38" stroke="#FAF6F0" stroke-width="3" stroke-linecap="round" opacity="0.6"/>
+                        <ellipse cx="32" cy="46" r="12" rx="12" ry="6" fill="#FAF6F0" stroke="#422637" stroke-width="2"/>
+                        <rect x="24" y="44" width="16" height="4" rx="1" fill="#FFC3C8" stroke="#422637" stroke-width="1.5"/>
+                    </svg>`
+                },
+                {
+                    title: "Lotion Bottle",
+                    svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="20" y="24" width="24" height="28" rx="6" fill="#FF8E72" stroke="#422637" stroke-width="2.5"/>
+                        <rect x="26" y="18" width="12" height="6" fill="#FFC3C8" stroke="#422637" stroke-width="2"/>
+                        <path d="M32 18 L32 10 Q28 10 26 12" stroke="#422637" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                        <circle cx="32" cy="38" r="3" fill="#DDA15E"/>
+                        <circle cx="32" cy="32" r="2.5" fill="#FFC3C8"/>
+                        <circle cx="32" cy="44" r="2.5" fill="#FFC3C8"/>
+                        <circle cx="26" cy="38" r="2.5" fill="#FFC3C8"/>
+                        <circle cx="38" cy="38" r="2.5" fill="#FFC3C8"/>
+                    </svg>`
+                },
+                {
+                    title: "Sheet Mask",
+                    svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="32" cy="32" r="24" fill="#FFC3C8" stroke="#422637" stroke-width="2.5"/>
+                        <ellipse cx="23" cy="27" rx="4" ry="5" fill="#FAF6F0" stroke="#422637" stroke-width="2"/>
+                        <ellipse cx="41" cy="27" rx="4" ry="5" fill="#FAF6F0" stroke="#422637" stroke-width="2"/>
+                        <ellipse cx="32" cy="41" rx="5" ry="3" fill="#FAF6F0" stroke="#422637" stroke-width="2"/>
+                    </svg>`
+                },
+                {
+                    title: "Perfume Bottle",
+                    svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="18" y="24" width="28" height="28" rx="8" fill="#AFAEF0" stroke="#422637" stroke-width="2.5"/>
+                        <line x1="26" y1="38" x2="38" y2="38" stroke="#422637" stroke-width="2.5" stroke-linecap="round"/>
+                        <rect x="28" y="18" width="8" height="6" fill="#DDA15E" stroke="#422637" stroke-width="2"/>
+                        <circle cx="16" cy="18" r="6" fill="#FF8E72" stroke="#422637" stroke-width="2"/>
+                        <path d="M22 18 L28 18" stroke="#422637" stroke-width="2"/>
+                        <circle cx="48" cy="14" r="1.5" fill="#DDA15E"/>
+                        <circle cx="52" cy="18" r="1" fill="#DDA15E"/>
+                        <circle cx="46" cy="22" r="1.5" fill="#DDA15E"/>
+                    </svg>`
+                },
+                {
+                    title: "Nail Polish",
+                    svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="20" y="28" width="24" height="24" rx="4" fill="#AFAEF0" stroke="#422637" stroke-width="2.5"/>
+                        <circle cx="32" cy="40" r="6" fill="#FF8E72" stroke="#422637" stroke-width="2"/>
+                        <rect x="27" y="10" width="10" height="18" rx="2" fill="#422637"/>
+                    </svg>`
+                },
+                {
+                    title: "Avocado Cream",
+                    svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M16 10 L48 10 L44 48 L20 48 Z" fill="#C3E5C8" stroke="#422637" stroke-width="2.5" stroke-linejoin="round"/>
+                        <ellipse cx="32" cy="28" rx="7" ry="10" fill="#88D49E" stroke="#422637" stroke-width="2"/>
+                        <circle cx="32" cy="31" r="3.5" fill="#DDA15E" stroke="#422637" stroke-width="1.5"/>
+                        <path d="M20 48 L44 48 L42 56 L22 56 Z" fill="#FFC3C8" stroke="#422637" stroke-width="2.5" stroke-linejoin="round"/>
+                    </svg>`
+                }
+            ];
+
+            // Shuffle and pick 6
+            const shuffled = itemsPool.sort(() => 0.5 - Math.random());
+            for (let i = 0; i < 6; i++) {
+                const item = shuffled[i];
+                const div = document.createElement('div');
+                div.className = `floating-item pos-${i+1}`;
+                div.title = `${item.title} - Hover to erase`;
+                div.innerHTML = item.svg;
+                cosmeticSpace.appendChild(div);
+            }
+        }
+
+        // Apply greeting immediately on load
+        applyGreeting();
+        renderSessionCosmetics();
+
+        function handleKeydown(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function usePrompt(text) {
+            userInput.value = text;
+            sendMessage();
+        }
+
+        function startNewChat() {
+            window.location.reload();
+        }
+
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            // Remove welcome screen, space cosmetics & glowing aura dots on first message
+            if (welcomeScreen && welcomeScreen.parentNode) {
+                welcomeScreen.remove();
+            }
+            if (geminiGlow) {
+                geminiGlow.remove();
+            }
+            if (cosmeticSpace) {
+                cosmeticSpace.remove();
+            }
+
+            // Append user message
+            appendMessage('user', text);
+            userInput.value = '';
+            
+            // Adjust textarea height
+            userInput.style.height = '24px';
+
+            // Show typing indicator
+            const typingId = showTypingIndicator();
+
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: text }),
+                });
+
+                const data = await response.json();
+                removeTypingIndicator(typingId);
+                
+                if (data.error) {
+                    appendMessage('agent', `An error occurred: ${data.error}`);
+                } else {
+                    appendMessage('agent', data.response);
+                }
+            } catch (err) {
+                removeTypingIndicator(typingId);
+                appendMessage('agent', 'Sorry, I encountered an issue connecting to the server. Please try again.');
+            }
+        }
+
+        function appendMessage(sender, content) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.className = 'bubble';
+            
+            if (sender === 'user') {
+                bubbleDiv.textContent = content;
+            } else {
+                bubbleDiv.innerHTML = formatAgentOutput(content);
+            }
+            
+            messageDiv.appendChild(bubbleDiv);
+            chatContainer.appendChild(messageDiv);
+            chatScrollWrapper.scrollTop = chatScrollWrapper.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const id = 'typing_' + Date.now();
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message agent';
+            messageDiv.id = id;
+            
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.className = 'bubble';
+            
+            const indicatorDiv = document.createElement('div');
+            indicatorDiv.className = 'typing-indicator';
+            indicatorDiv.innerHTML = `
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            `;
+            
+            bubbleDiv.appendChild(indicatorDiv);
+            messageDiv.appendChild(bubbleDiv);
+            chatContainer.appendChild(messageDiv);
+            chatScrollWrapper.scrollTop = chatScrollWrapper.scrollHeight;
+            return id;
+        }
+
+        function removeTypingIndicator(id) {
+            const indicator = document.getElementById(id);
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+
+        // Beautiful custom formatter for agent responses
+        function formatAgentOutput(text) {
+            try {
+                if (text.trim().startsWith('{') || text.trim().startsWith('[')) {
+                    const cleanText = text.replace(/\\n/g, ' ').replace(/\\t/g, ' ');
+                    const parsed = JSON.parse(cleanText);
+                    return renderParsedJSON(parsed);
+                }
+            } catch (e) {
+                // Ignore
+            }
+
+            let html = text;
+            html = html.replace(/```(json|html|css|javascript)?([\s\S]*?)```/g, '<pre style="background:#F7F4EF; padding:10px; border-radius:8px; overflow-x:auto; margin:10px 0;">$2</pre>');
+            html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+            html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/^\* (.*$)/gim, '<li>$1</li>');
+            html = html.replace(/^- (.*$)/gim, '<li>$1</li>');
+            html = html.replace(/(<li>.*<\/li>)/gim, '<ul>$1</ul>');
+            html = html.replace(/<\/ul>\s*<ul>/g, '');
+            html = html.replace(/\n\n/g, '<p></p>');
+            html = html.replace(/\n/g, '<br>');
+            return html;
+        }
+
+        function renderParsedJSON(obj) {
+            let html = '';
+            if (obj.skin_type && obj.AM_routine) {
+                html += `<p><strong>Analyzed Skin Type:</strong> <span style="text-transform: capitalize; color: var(--accent-plum); font-weight: 600;">${obj.skin_type}</span></p>`;
+                if (obj.concerns && obj.concerns.length > 0) {
+                    html += `<p><strong>Identified Concerns:</strong> ${obj.concerns.join(', ')}</p>`;
+                }
+                if (obj.ingredients_to_avoid && obj.ingredients_to_avoid.length > 0) {
+                    html += `<div class="highlight-box" style="border-left-color: #E53E3E;"><strong>Ingredients to Avoid:</strong> ${obj.ingredients_to_avoid.join(', ')}</div>`;
+                }
+                html += '<div class="routine-container">';
+                if (obj.AM_routine && obj.AM_routine.length > 0) {
+                    html += `
+                        <div class="routine-column">
+                            <h4>AM Routine</h4>
+                            ${obj.AM_routine.map((step, i) => `<div class="routine-step"><span class="routine-step-num">${i+1}.</span> ${step}</div>`).join('')}
+                        </div>
+                    `;
+                }
+                if (obj.PM_routine && obj.PM_routine.length > 0) {
+                    html += `
+                        <div class="routine-column">
+                            <h4>PM Routine</h4>
+                            ${obj.PM_routine.map((step, i) => `<div class="routine-step"><span class="routine-step-num">${i+1}.</span> ${step}</div>`).join('')}
+                        </div>
+                    `;
+                }
+                html += '</div>';
+                if (obj.notes) {
+                    html += `<p style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-muted);">${obj.notes}</p>`;
+                }
+                return html;
+            }
+
+            if (obj.confirmed_undertone && obj.top_3_foundations) {
+                html += `<p><strong>Confirmed Undertone:</strong> <span style="text-transform: capitalize; color: var(--accent-plum); font-weight: 600;">${obj.confirmed_undertone}</span> | <strong>Depth:</strong> <span style="text-transform: capitalize; color: var(--accent-plum); font-weight: 600;">${obj.confirmed_depth}</span></p>`;
+                html += '<h3>Recommended Foundations</h3>';
+                html += '<div class="shade-grid">';
+                obj.top_3_foundations.forEach(f => {
+                    const badgeClass = f.price_range.toLowerCase().replace(' ', '-');
+                    html += `
+                        <div class="shade-card">
+                            <span class="shade-badge ${badgeClass}">${f.price_range}</span>
+                            <div class="shade-brand">${f.brand}</div>
+                            <h4>${f.shade_name}</h4>
+                            <div class="shade-reason">${f.why_it_works}</div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+
+                if (obj.top_2_concealers && obj.top_2_concealers.length > 0) {
+                    html += '<h3 style="margin-top: 1.5rem;">Recommended Concealers</h3>';
+                    html += '<div class="shade-grid">';
+                    obj.top_2_concealers.forEach(c => {
+                        const badgeClass = c.price_range.toLowerCase().replace(' ', '-');
+                        html += `
+                            <div class="shade-card">
+                                <span class="shade-badge ${badgeClass}">${c.price_range}</span>
+                                <div class="shade-brand">${c.brand}</div>
+                                <h4>${c.shade_name}</h4>
+                                <div class="shade-reason">${c.why_it_works}</div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                }
+                if (obj.pro_tip) {
+                    html += `<div class="highlight-box"><strong>Pro Tip:</strong> ${obj.pro_tip}</div>`;
+                }
+                return html;
+            }
+
+            if (obj.three_dupes) {
+                html += `<h3>Dupes for ${obj.original_product || 'Product'} (${obj.original_price || ''})</h3>`;
+                html += '<div class="shade-grid">';
+                obj.three_dupes.forEach(d => {
+                    html += `
+                        <div class="shade-card" style="border-top: 4px solid #319795;">
+                            <div class="shade-brand">${d.brand}</div>
+                            <h4>${d.name}</h4>
+                            <p style="font-weight: 600; color: #234E52; margin: 0.2rem 0 0.5rem 0;">${d.price}</p>
+                            <p style="font-size: 0.8rem; margin-bottom: 0.5rem;"><strong>Ingredients:</strong> ${d.key_shared_ingredients.join(', ')}</p>
+                            <div class="shade-reason">${d.why_it_works}</div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                if (obj.conflict_warning) {
+                    html += `<div class="highlight-box" style="border-left-color: #DD6B20;"><strong>Conflict Warning:</strong> ${obj.conflict_warning}</div>`;
+                }
+                return html;
+            }
+
+            if (obj.AM_routine && Array.isArray(obj.AM_routine) && obj.AM_routine[0] && obj.AM_routine[0].product) {
+                html += '<h3>Your Structured Complete Routine</h3>';
+                html += '<div class="routine-container">';
+                html += `
+                    <div class="routine-column">
+                        <h4>AM Routine (Skincare to Makeup)</h4>
+                        ${obj.AM_routine.map(step => `
+                            <div class="routine-step" style="margin-bottom: 1rem; border-bottom: 1px solid var(--border-soft); padding-bottom: 0.5rem;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0.2rem;">
+                                    <span style="font-weight:600; color:var(--accent-plum);">${step.step_number}. ${step.product}</span>
+                                    ${step.wait_time ? `<span style="font-size:0.75rem; background:#EDF2F7; padding:2px 6px; border-radius:4px; color:#4A5568;">Wait: ${step.wait_time}</span>` : ''}
+                                </div>
+                                <div style="font-size:0.8rem; color:var(--text-muted); font-style:italic;">Action: ${step.action}</div>
+                                <div style="font-size:0.85rem; margin-top:0.2rem;">${step.rationale}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+                if (obj.PM_routine && obj.PM_routine.length > 0) {
+                    html += `
+                        <div class="routine-column">
+                            <h4>PM Routine (Skincare Treatments)</h4>
+                            ${obj.PM_routine.map(step => `
+                                <div class="routine-step" style="margin-bottom: 1rem; border-bottom: 1px solid var(--border-soft); padding-bottom: 0.5rem;">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0.2rem;">
+                                        <span style="font-weight:600; color:var(--accent-plum);">${step.step_number}. ${step.product}</span>
+                                        ${step.wait_time ? `<span style="font-size:0.75rem; background:#EDF2F7; padding:2px 6px; border-radius:4px; color:#4A5568;">Wait: ${step.wait_time}</span>` : ''}
+                                    </div>
+                                    <div style="font-size:0.8rem; color:var(--text-muted); font-style:italic;">Action: ${step.action}</div>
+                                    <div style="font-size:0.85rem; margin-top:0.2rem;">${step.rationale}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+                html += '</div>';
+
+                if (obj.three_pro_tips && obj.three_pro_tips.length > 0) {
+                    html += '<h3 style="margin-top: 1.5rem;">Pro Tips</h3>';
+                    html += '<ul>' + obj.three_pro_tips.map(tip => `<li>${tip}</li>`).join('') + '</ul>';
+                }
+                if (obj.skip_days_warning) {
+                    html += `<div class="highlight-box" style="border-left-color: #DD6B20;"><strong>Important Warning:</strong> ${obj.skip_days_warning}</div>`;
+                }
+                return html;
+            }
+
+            html += '<pre style="background:#F7F4EF; padding:10px; border-radius:8px; overflow-x:auto;">' + JSON.stringify(obj, null, 2) + '</pre>';
+            return html;
+        }
+    </script>
+</body>
+</html>
