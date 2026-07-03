@@ -79,13 +79,91 @@ async def run_agent_helper(agent: Agent, query: str) -> str:
     await runner.close()
     return response_text
 
+def format_skin_analyst(res_json: str) -> str:
+    try:
+        data = json.loads(res_json)
+        formatted = "### Here is your skin analysis, gorgeous! ✨\n\n"
+        formatted += f"- **Skin Type**: {data.get('skin_type', 'N/A')} 💖\n"
+        
+        concerns = data.get('concerns', [])
+        if concerns:
+            formatted += f"- **Concerns**: {', '.join(concerns)} 🌸\n"
+            
+        avoid = data.get('ingredients_to_avoid', [])
+        if avoid:
+            formatted += f"- **Ingredients to Avoid**: {', '.join(avoid)} 🚫\n"
+            
+        formatted += "\n#### ☀️ Recommended Morning (AM) Routine\n"
+        for step in data.get('AM_routine', []):
+            formatted += f"- {step}\n"
+            
+        formatted += "\n#### 🌙 Recommended Evening (PM) Routine\n"
+        for step in data.get('PM_routine', []):
+            formatted += f"- {step}\n"
+            
+        if data.get('notes'):
+            formatted += f"\n*Tip: {data['notes']}*\n"
+        return formatted
+    except Exception:
+        return res_json
+
+def format_shade_matcher(res_json: str) -> str:
+    try:
+        data = json.loads(res_json)
+        formatted = "### Found your perfect matches! Let's get you glowing! 💄✨\n\n"
+        formatted += f"- **Confirmed Undertone**: {data.get('confirmed_undertone', 'N/A')} 🎨\n"
+        formatted += f"- **Confirmed Depth**: {data.get('confirmed_depth', 'N/A')} ✨\n\n"
+        
+        formatted += "#### 💖 Recommended Foundations\n"
+        for opt in data.get('top_3_foundations', []):
+            formatted += f"- **{opt.get('brand')}** ({opt.get('shade_name')}) — *{opt.get('price_range')}*\n"
+            formatted += f"  *{opt.get('why_it_works')}*\n"
+            
+        formatted += "\n#### 🛍️ Recommended Concealers\n"
+        for opt in data.get('top_2_concealers', []):
+            formatted += f"- **{opt.get('brand')}** ({opt.get('shade_name')}) — *{opt.get('price_range')}*\n"
+            formatted += f"  *{opt.get('why_it_works')}*\n"
+            
+        if data.get('pro_tip'):
+            formatted += f"\n*Pro Tip: {data['pro_tip']}*\n"
+        return formatted
+    except Exception:
+        return res_json
+
+def format_routine_planner(res_json: str) -> str:
+    try:
+        data = json.loads(res_json)
+        formatted = "### Scheduled Routine Sequencing 🧴✨\n\n"
+        formatted += "**☀️ Morning (AM) Routine Sequence:**\n"
+        for step in data.get('AM_routine', []):
+            wait_str = f" (Wait: {step.get('wait_time')})" if step.get('wait_time') else ""
+            formatted += f"{step.get('step_number')}. **{step.get('action')}**: {step.get('product')}{wait_str}\n"
+            formatted += f"   *Why: {step.get('rationale')}*\n"
+            
+        formatted += f"\n**🌙 Evening (PM) Routine Sequence:**\n"
+        for step in data.get('PM_routine', []):
+            wait_str = f" (Wait: {step.get('wait_time')})" if step.get('wait_time') else ""
+            formatted += f"{step.get('step_number')}. **{step.get('action')}**: {step.get('product')}{wait_str}\n"
+            formatted += f"   *Why: {step.get('rationale')}*\n"
+            
+        if data.get('three_pro_tips'):
+            formatted += f"\n#### 🌸 Pro Tips\n"
+            for tip in data['three_pro_tips']:
+                formatted += f"- {tip}\n"
+                
+        if data.get('skip_days_warning'):
+            formatted += f"\n> [!WARNING]\n> **Skip Days / Alternating Warning**: {data['skip_days_warning']}\n"
+        return formatted
+    except Exception:
+        return res_json
+
 async def analyze_skin(query: str) -> str:
     """Assess skin type, identify concerns, flag ingredient conflicts, and recommend skincare routine.
     Call this tool when the user mentions skin type, concerns, breakouts, ingredients, or wants skincare advice.
     """
     res = await run_agent_helper(SkinAnalystAgent, query)
     session_context["skin_analysis"] = res
-    return res
+    return format_skin_analyst(res)
 
 async def match_shade(query: str) -> str:
     """Determine a user's foundation and concealer shade based on undertone and depth.
@@ -96,7 +174,7 @@ async def match_shade(query: str) -> str:
         context_msg += f"\nPrevious skin analysis context:\n{session_context['skin_analysis']}"
     res = await run_agent_helper(ShadeMatcherAgent, context_msg)
     session_context["shade_match"] = res
-    return res
+    return format_shade_matcher(res)
 
 async def research_product(query: str) -> str:
     """Find affordable dupes, check ingredient conflicts between two products, or check suitability for a skin type.
@@ -129,9 +207,9 @@ async def full_routine_flow(query: str) -> str:
     session_context["routine_plan"] = routine_res
     
     combined = (
-        f"=== Skin Analysis ===\n{skin_res}\n\n"
-        f"=== Shade Matching & Makeup ===\n{shade_res}\n\n"
-        f"=== Routine Plan ===\n{routine_res}"
+        format_skin_analyst(skin_res) + "\n\n" +
+        format_shade_matcher(shade_res) + "\n\n" +
+        format_routine_planner(routine_res)
     )
     return combined
 
