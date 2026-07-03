@@ -1564,7 +1564,7 @@
 
         async function sendMessage() {
             const text = userInput.value.trim();
-            if (!text) return;
+            if (!text && !attachedImage) return;
 
             // Remove welcome screen, space cosmetics & glowing aura dots on first message
             if (welcomeScreen && welcomeScreen.parentNode) {
@@ -1578,7 +1578,11 @@
             }
 
             // Append user message
-            appendMessage('user', text);
+            if (text) {
+                appendMessage('user', text);
+            } else {
+                appendMessage('user', '📷 [Sent a photo]');
+            }
             userInput.value = '';
             
             // Adjust textarea height
@@ -1587,7 +1591,7 @@
             // Show typing indicator
             const typingId = showTypingIndicator();
 
-            const payload = { message: text };
+            const payload = { message: text || "Please analyze this image." };
             if (attachedImage) {
                 payload.image = attachedImage;
                 removeAttachedImage();
