@@ -1,4 +1,6 @@
 # Jamalek
+<img width="1183" height="701" alt="image" src="https://github.com/user-attachments/assets/db7dabfb-5ce2-41e3-8cd7-521494295017" />
+
 
 Jamalek ("your beauty" in Arabic) is a beauty assistant that keeps track of your skin. You show it a selfie or tell it what your skin is doing that day, and it takes you from skincare prep through to a finished makeup look, pulling from products you already own before it suggests buying anything new.
 
