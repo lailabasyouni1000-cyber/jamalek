@@ -113,4 +113,4 @@ Selfies aren't stored, only the undertone label they produce. Anything that writ
 ## Demo
 
 - **Video**: <VIDEO_LINK>
-- **Live (Cloud Run)**: <CLOUD_RUN_URL>
+- **Live (Cloud Run)**: https://jamalek-724220720710.us-central1.run.app
