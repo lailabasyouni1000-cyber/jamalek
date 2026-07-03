@@ -19,9 +19,9 @@ def index():
     if profile.skin_type and profile.undertone:
         greeting = f"Welcome back! I remember you have {profile.skin_type} skin with a {profile.undertone} undertone. What can I help you with today?"
     else:
-        greeting = "Welcome to Jamalak. I am your personal skincare and makeup concierge. Let us start by getting to know your skin."
+        greeting = "Welcome to Jamalek. I am your personal skincare and makeup concierge. Let us start by getting to know your skin."
         
-    disclaimer = "Jamalak provides personalised beauty guidance only. It is not a medical tool and does not diagnose skin conditions. Always patch test new products and consult a dermatologist for persistent skin concerns."
+    disclaimer = "Jamalek provides personalised beauty guidance only. It is not a medical tool and does not diagnose skin conditions. Always patch test new products and consult a dermatologist for persistent skin concerns."
     return render_template("index.html", greeting=greeting, disclaimer=disclaimer)
 
 @app.route("/chat", methods=["POST"])

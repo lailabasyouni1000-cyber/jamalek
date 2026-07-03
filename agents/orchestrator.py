@@ -157,6 +157,27 @@ def format_routine_planner(res_json: str) -> str:
     except Exception:
         return res_json
 
+def format_product_researcher(res_json: str) -> str:
+    try:
+        data = json.loads(res_json)
+        orig_name = data.get('original_product') or "the product"
+        orig_price = f" ({data['original_price']})" if data.get('original_price') else ""
+        
+        formatted = f"### Found some amazing dupes for you! Let's save some cash! 💸✨\n\n"
+        formatted += f"Original Product: **{orig_name}**{orig_price}\n\n"
+        
+        formatted += "#### 🌸 Top Dupes I Found:\n"
+        for dupe in data.get('three_dupes', []):
+            formatted += f"- **{dupe.get('brand')} {dupe.get('name')}** (${dupe.get('price')}) 🛍️\n"
+            formatted += f"  - **Key Ingredients**: {', '.join(dupe.get('key_shared_ingredients', []))} 🧪\n"
+            formatted += f"  - **Why it's a match**: {dupe.get('why_it_works')} 💕\n\n"
+            
+        if data.get('conflict_warning'):
+            formatted += f"\n> [!WARNING]\n> **Ingredient Conflict Warning**: {data['conflict_warning']} ⚠️\n"
+        return formatted
+    except Exception:
+        return res_json
+
 async def analyze_skin(query: str) -> str:
     """Assess skin type, identify concerns, flag ingredient conflicts, and recommend skincare routine.
     Call this tool when the user mentions skin type, concerns, breakouts, ingredients, or wants skincare advice.
@@ -182,7 +203,7 @@ async def research_product(query: str) -> str:
     """
     res = await run_agent_helper(ProductResearcherAgent, query)
     session_context["product_research"] = res
-    return res
+    return format_product_researcher(res)
 
 async def full_routine_flow(query: str) -> str:
     """Sequence skin profile, recommended skincare products, and shade-matched makeup into correct AM/PM routine order.
@@ -323,6 +344,20 @@ Instructions:
         traceback.print_exc()
         return {}
 
+def check_routing_intent(user_input_lower: str):
+    import re
+    cleaned = re.sub(r'[^\w\s]', ' ', user_input_lower)
+    words = set(cleaned.split())
+    
+    is_dupe = any(phrase in user_input_lower for phrase in ["dupe", "alternative", "cheaper", "conflict", "suitability", "suitable", "drunk elephant", "b-hydra", "tatcha", "rhode", "glazing serum"])
+    is_routine = any(w in words for w in ["am", "pm"]) or any(phrase in user_input_lower for phrase in ["full routine", "what order", "morning routine", "night routine", "evening routine", "skincare routine", "makeup routine"])
+    is_shade = any(phrase in user_input_lower for phrase in ["shade", "undertone", "concealer", "colour matching", "color matching", "foundation", "vein", "jewelry"])
+    is_skin = any(phrase in user_input_lower for phrase in ["skin type", "concern", "breakout", "ingredient", "skincare advice", "acne", "dryness", "oily", "redness", "sensitivity", "sensitivities"])
+    
+    if is_dupe and not any(w in words for w in ["am", "pm"]):
+        return False, False, False, True
+    return is_routine, is_shade, is_skin, is_dupe
+
 async def process_message(user_input: str) -> str:
     """Routes and executes user input against the appropriate sub-agents or directly via Jamalak."""
     user_input_strip = user_input.strip()
@@ -363,10 +398,7 @@ async def process_message(user_input: str) -> str:
         return "Are you sure you want to delete your profile? Please type DELETE to confirm."
         
     # 5. Process normal query
-    is_routine = any(word in user_input_lower for word in ["full routine", "what order", "am", "pm", "morning routine", "night routine", "evening routine"])
-    is_skin = any(word in user_input_lower for word in ["skin type", "concern", "breakout", "ingredient", "skincare advice", "acne", "dryness", "oily", "redness", "sensitivity", "sensitivities"])
-    is_shade = any(word in user_input_lower for word in ["shade", "undertone", "concealer", "colour matching", "color matching", "foundation", "vein", "jewelry"])
-    is_dupe = any(word in user_input_lower for word in ["dupe", "alternative", "cheaper", "conflict", "suitability", "suitable", "drunk elephant", "b-hydra"])
+    is_routine, is_shade, is_skin, is_dupe = check_routing_intent(user_input_lower)
     
     if is_routine:
         res = await full_routine_flow(user_input)
@@ -426,10 +458,7 @@ async def main_async():
             break
             
         user_input_lower = user_input.lower()
-        is_routine = any(word in user_input_lower for word in ["full routine", "what order", "am", "pm", "morning routine", "night routine", "evening routine"])
-        is_skin = any(word in user_input_lower for word in ["skin type", "concern", "breakout", "ingredient", "skincare advice", "acne", "dryness", "oily", "redness", "sensitivity", "sensitivities"])
-        is_shade = any(word in user_input_lower for word in ["shade", "undertone", "concealer", "colour matching", "color matching", "foundation", "vein", "jewelry"])
-        is_dupe = any(word in user_input_lower for word in ["dupe", "alternative", "cheaper", "conflict", "suitability", "suitable", "drunk elephant", "b-hydra"])
+        is_routine, is_shade, is_skin, is_dupe = check_routing_intent(user_input_lower)
 
         try:
             state = load_pending_state()
@@ -438,15 +467,15 @@ async def main_async():
             elif user_input_lower == "delete my profile":
                 pass
             elif is_routine:
-                print("\n[Jamalak]: Routing to Full Routine flow...")
+                print("\n[Jamalek]: Routing to Full Routine flow...")
             elif is_shade:
-                print("\n[Jamalak]: Routing to Shade Matcher...")
+                print("\n[Jamalek]: Routing to Shade Matcher...")
             elif is_skin:
-                print("\n[Jamalak]: Routing to Skin Analyst...")
+                print("\n[Jamalek]: Routing to Skin Analyst...")
             elif is_dupe:
-                print("\n[Jamalak]: Routing to Product Researcher...")
+                print("\n[Jamalek]: Routing to Product Researcher...")
             else:
-                print("\n[Jamalak]: Answering directly as Jamalak...")
+                print("\n[Jamalek]: Answering directly as Jamalek...")
             
             res = await process_message(user_input)
             print(res)
