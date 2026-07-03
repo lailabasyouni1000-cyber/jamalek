@@ -434,14 +434,14 @@ async def process_message(user_input: str) -> str:
 
 async def main_async():
     # Print the disclaimer on startup
-    print("Jamalak provides personalised beauty guidance only. It is not a medical tool and does not diagnose skin conditions. Always patch test new products and consult a dermatologist for persistent skin concerns.\n")
+    print("Jamalek provides personalised beauty guidance only. It is not a medical tool and does not diagnose skin conditions. Always patch test new products and consult a dermatologist for persistent skin concerns.\n")
     
     # Session startup greeting based on profile
     profile = load_profile()
     if profile.skin_type and profile.undertone:
-        print(f"Welcome back! I remember you have {profile.skin_type} skin with a {profile.undertone} undertone. What can I help you with today?")
+        print(f"Hey! Welcome back, gorgeous. 💖 Still matching your {profile.skin_type} skin and {profile.undertone} undertone! What are we working on today? ✨")
     else:
-        print("Welcome to Jamalak. I am your personal skincare and makeup concierge. Let us start by getting to know your skin.")
+        print("Hey love! Welcome to Jamalek, your new skincare and makeup bestie. 💖 Tell me a bit about your skin, or drop a selfie so we can get started! ✨")
         
     # Clear any leftover pending state from previous sessions
     clear_pending_state()
