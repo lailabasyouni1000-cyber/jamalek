@@ -1583,11 +1583,7 @@
             }
 
             // Append user message
-            if (text) {
-                appendMessage('user', text);
-            } else {
-                appendMessage('user', '📷 [Sent a photo]');
-            }
+            appendMessage('user', text, attachedImage);
             userInput.value = '';
             
             // Adjust textarea height
@@ -1639,7 +1635,7 @@
             }
         }
 
-        function appendMessage(sender, content) {
+        function appendMessage(sender, content, image = null) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${sender}`;
             
@@ -1647,7 +1643,22 @@
             bubbleDiv.className = 'bubble';
             
             if (sender === 'user') {
-                bubbleDiv.textContent = content;
+                if (image) {
+                    const img = document.createElement('img');
+                    img.src = image.data;
+                    img.style.maxHeight = '150px';
+                    img.style.maxWidth = '100%';
+                    img.style.borderRadius = '8px';
+                    img.style.display = 'block';
+                    img.style.marginBottom = content ? '8px' : '0';
+                    img.style.objectFit = 'cover';
+                    bubbleDiv.appendChild(img);
+                }
+                if (content) {
+                    const textSpan = document.createElement('span');
+                    textSpan.textContent = content;
+                    bubbleDiv.appendChild(textSpan);
+                }
             } else {
                 bubbleDiv.innerHTML = formatAgentOutput(content);
             }
