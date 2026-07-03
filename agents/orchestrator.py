@@ -459,9 +459,9 @@ async def main_async():
     # Session startup greeting based on profile
     profile = load_profile()
     if profile.skin_type and profile.undertone:
-        print(f"Hey! Welcome back, gorgeous. 💖 Still matching your {profile.skin_type} skin and {profile.undertone} undertone! What are we working on today? ✨")
+        print("Hey gorgeous! What are we working on today?")
     else:
-        print("Hey love! Welcome to Jamalek, your new skincare and makeup bestie. 💖 Tell me a bit about your skin, or drop a selfie so we can get started! ✨")
+        print("Hey love! Welcome to Jamalek. Drop a selfie or tell me about your skin!")
         
     # Clear any leftover pending state from previous sessions
     clear_pending_state()

@@ -1855,31 +1855,16 @@
             return html;
         }
 
-        // Programmatic attachment handler to bypass inline onclick limits and browser security issues
-        document.addEventListener('DOMContentLoaded', () => {
-            const attachBtn = document.getElementById('attachBtn');
-            const fileInput = document.getElementById('fileInput');
-            if (attachBtn && fileInput) {
-                attachBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    fileInput.click();
-                });
-            }
-        });
-        
-        // Immediate bind fallback
-        setTimeout(() => {
-            const attachBtn = document.getElementById('attachBtn');
-            const fileInput = document.getElementById('fileInput');
-            if (attachBtn && fileInput) {
-                attachBtn.onclick = (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    fileInput.click();
-                };
-            }
-        }, 100);
+        // Direct click event listener for file uploads
+        const attachBtn = document.getElementById('attachBtn');
+        const fileInput = document.getElementById('fileInput');
+        if (attachBtn && fileInput) {
+            attachBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                fileInput.click();
+            });
+        }
     </script>
 </body>
 </html>

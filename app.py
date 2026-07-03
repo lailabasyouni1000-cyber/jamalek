@@ -17,9 +17,9 @@ app = Flask(__name__)
 def index():
     profile = load_profile()
     if profile.skin_type and profile.undertone:
-        greeting = f"Hey! Welcome back, gorgeous. 💖 Still matching your {profile.skin_type} skin and {profile.undertone} undertone! What are we working on today? ✨"
+        greeting = "Hey gorgeous! What are we working on today?"
     else:
-        greeting = "Hey love! Welcome to Jamalek, your new skincare and makeup bestie. 💖 Tell me a bit about your skin, or drop a selfie so we can get started! ✨"
+        greeting = "Hey love! Welcome to Jamalek. Drop a selfie or tell me about your skin!"
         
     disclaimer = "Jamalek provides personalised beauty guidance only. It is not a medical tool and does not diagnose skin conditions. Always patch test new products and consult a dermatologist for persistent skin concerns."
     return render_template("index.html", greeting=greeting, disclaimer=disclaimer)
