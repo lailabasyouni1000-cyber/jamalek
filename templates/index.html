@@ -1286,9 +1286,10 @@
                 <div class="input-panel">
                     <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleFileSelect(event)" />
                     <!-- Left Add/Attach Icon matching Gemini -->
-                    <button class="input-utility-btn" title="Add attachments" onclick="document.getElementById('fileInput').click()">
+                    <button class="input-utility-btn" id="attachBtn" title="Add attachments">
                         <svg viewBox="0 0 24 24">
-                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
                         </svg>
                     </button>
                     
@@ -1849,6 +1850,32 @@
             html += '<pre style="background:#F7F4EF; padding:10px; border-radius:8px; overflow-x:auto;">' + JSON.stringify(obj, null, 2) + '</pre>';
             return html;
         }
+
+        // Programmatic attachment handler to bypass inline onclick limits and browser security issues
+        document.addEventListener('DOMContentLoaded', () => {
+            const attachBtn = document.getElementById('attachBtn');
+            const fileInput = document.getElementById('fileInput');
+            if (attachBtn && fileInput) {
+                attachBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    fileInput.click();
+                });
+            }
+        });
+        
+        // Immediate bind fallback
+        setTimeout(() => {
+            const attachBtn = document.getElementById('attachBtn');
+            const fileInput = document.getElementById('fileInput');
+            if (attachBtn && fileInput) {
+                attachBtn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    fileInput.click();
+                };
+            }
+        }, 100);
     </script>
 </body>
 </html>
