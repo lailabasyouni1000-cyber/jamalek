@@ -1,23 +1,18 @@
-# Security Policy — Jamalek Skincare Concierge
+# Jamalek Security and Data Privacy
 
-This document details the security and privacy controls implemented in Jamalek to protect user data and ensure user control.
+I set up the security controls in this project to make sure user data is handled safely and that users have full control over what is saved. The main rules the project follows are:
 
-## 1. Ephemeral Media Processing
-- **Selfies and Images**: Any uploaded selfie or skin photo is sent directly and ephemerally to the Gemini Vision API for analysis (e.g., matching skin tones or identifying visible concerns). 
-- **No Disk Storage**: Raw image files are processed in-memory and are **never** stored on disk or committed to the codebase. Only the resulting text classifications (such as undertone label or identified concerns) are returned to the user session.
+## 1. How Selfies are Handled
+When you upload a selfie or skin photo, the image is passed directly to the Gemini API for analysis (like finding your undertone). The raw image file is processed in memory and never written to disk, which means it is never saved locally or committed to GitHub. The agent only returns the resulting text classification to the chat session.
 
-## 2. Human-in-the-Loop Consent Gate
-- **No Silent Updates**: Before writing or updating any personal skin details (such as skin type, triggers, or owned products) to the local profile, Jamalek prompts the user for explicit confirmation:
-  `I'd like to save [updates] to your profile so I remember it next time. Save this? (yes/no)`
-- **Opt-Out**: If the user responds with "no" or "n", the facts are kept in-memory for the current chat session only and are discarded when the session ends.
+## 2. Consent Gate for Profile Updates
+Before any new facts (like your skin type, triggers, or products you own) are saved to your local profile, the orchestrator stops and asks you for permission. If you type "no", the update is used for the current session only and is discarded when the session ends.
 
-## 3. Data Deletion (Right to Be Forgotten)
-- **Immediate Purge**: Users can delete their saved profile at any time by typing `delete my profile`.
-- **Double Confirmation**: The system will prompt the user to type `DELETE` to confirm. Once confirmed, `user_profile.json` and any cached session state are completely deleted from the disk.
+## 3. Deleting Your Profile
+You can completely delete your saved profile at any time. Typing "delete my profile" will trigger a confirmation prompt asking you to type "DELETE". Once you do, the code removes `user_profile.json` and clears any pending session state from the disk.
 
-## 4. Local Credential and Profile Safety
-- **Git Protection**: The project's `.gitignore` explicitly excludes all sensitive configurations, environments, and databases:
-  - `.env` (contains API keys)
-  - `data/user_profile.json` (user profile data)
-  - `data/pending_state.json` (state cache)
-  - `.venv/` (local virtual environments)
+## 4. Protecting Secrets and Profile Data
+I added a `.gitignore` file to prevent sensitive configurations and personal data from being committed to Git. The ignored paths include:
+- The `.env` file (which holds your API keys)
+- The `.venv/` folder (local python environments)
+- The `data/user_profile.json` and `data/pending_state.json` files (your saved skin profiles and temporary session state)
