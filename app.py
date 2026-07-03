@@ -31,10 +31,11 @@ def chat():
         return jsonify({"error": "No message provided"}), 400
         
     user_message = data["message"]
+    image_data = data.get("image")
     
     try:
         # Run the async orchestrator function synchronously using asyncio.run
-        response_text = asyncio.run(process_message(user_message))
+        response_text = asyncio.run(process_message(user_message, image_data))
         return jsonify({"response": response_text})
     except Exception as e:
         return jsonify({"error": str(e)}), 500

@@ -43,11 +43,12 @@ session_context = {
     "routine_plan": None
 }
 
-async def run_agent_helper(agent: Agent, query: str) -> str:
+async def run_agent_helper(agent: Agent, query: str, image_data: dict = None) -> str:
     """Helper function to programmatically execute a sub-agent with user profile context prepended."""
     from google.adk.sessions.in_memory_session_service import InMemorySessionService
     from google.adk.artifacts.in_memory_artifact_service import InMemoryArtifactService
     from google.adk.auth.credential_service.in_memory_credential_service import InMemoryCredentialService
+    import base64
     
     session_service = InMemorySessionService()
     artifact_service = InMemoryArtifactService()
@@ -67,7 +68,16 @@ async def run_agent_helper(agent: Agent, query: str) -> str:
     )
     
     session = await session_service.create_session(app_name=agent.name, user_id="orchestrator_user")
-    content = types.Content(role="user", parts=[types.Part(text=full_query)])
+    
+    parts = [types.Part(text=full_query)]
+    if image_data:
+        b64_content = image_data["data"]
+        if "," in b64_content:
+            b64_content = b64_content.split(",", 1)[1]
+        raw_bytes = base64.b64decode(b64_content)
+        parts.append(types.Part(inline_data=types.Blob(mime_type=image_data["mime"], data=raw_bytes)))
+        
+    content = types.Content(role="user", parts=parts)
     
     response_text = ""
     async for event in runner.run_async(user_id="orchestrator_user", session_id=session.id, new_message=content):
@@ -178,44 +188,44 @@ def format_product_researcher(res_json: str) -> str:
     except Exception:
         return res_json
 
-async def analyze_skin(query: str) -> str:
+async def analyze_skin(query: str, image_data: dict = None) -> str:
     """Assess skin type, identify concerns, flag ingredient conflicts, and recommend skincare routine.
     Call this tool when the user mentions skin type, concerns, breakouts, ingredients, or wants skincare advice.
     """
-    res = await run_agent_helper(SkinAnalystAgent, query)
+    res = await run_agent_helper(SkinAnalystAgent, query, image_data)
     session_context["skin_analysis"] = res
     return format_skin_analyst(res)
 
-async def match_shade(query: str) -> str:
+async def match_shade(query: str, image_data: dict = None) -> str:
     """Determine a user's foundation and concealer shade based on undertone and depth.
     Call this tool when the user mentions foundation shade, undertone, concealer, or color matching.
     """
     context_msg = query
     if session_context["skin_analysis"]:
         context_msg += f"\nPrevious skin analysis context:\n{session_context['skin_analysis']}"
-    res = await run_agent_helper(ShadeMatcherAgent, context_msg)
+    res = await run_agent_helper(ShadeMatcherAgent, context_msg, image_data)
     session_context["shade_match"] = res
     return format_shade_matcher(res)
 
-async def research_product(query: str) -> str:
+async def research_product(query: str, image_data: dict = None) -> str:
     """Find affordable dupes, check ingredient conflicts between two products, or check suitability for a skin type.
     Call this tool when the user mentions dupes, cheaper alternatives, ingredient conflicts, or product suitability.
     """
-    res = await run_agent_helper(ProductResearcherAgent, query)
+    res = await run_agent_helper(ProductResearcherAgent, query, image_data)
     session_context["product_research"] = res
     return format_product_researcher(res)
 
-async def full_routine_flow(query: str) -> str:
+async def full_routine_flow(query: str, image_data: dict = None) -> str:
     """Sequence skin profile, recommended skincare products, and shade-matched makeup into correct AM/PM routine order.
     Call this tool for full routine sequencing, application order, AM/PM routine.
     """
     # 1. Call Skin Analyst
-    skin_res = await run_agent_helper(SkinAnalystAgent, query)
+    skin_res = await run_agent_helper(SkinAnalystAgent, query, image_data)
     session_context["skin_analysis"] = skin_res
     
     # 2. Call Shade Matcher (pass skin analysis context)
     shade_query = query + f"\nPrevious skin analysis context:\n{skin_res}"
-    shade_res = await run_agent_helper(ShadeMatcherAgent, shade_query)
+    shade_res = await run_agent_helper(ShadeMatcherAgent, shade_query, image_data)
     session_context["shade_match"] = shade_res
     
     # 3. Call Routine Planner
@@ -224,7 +234,7 @@ async def full_routine_flow(query: str) -> str:
         f"Skin Analysis: {skin_res}\n"
         f"Shade Match & Makeup: {shade_res}"
     )
-    routine_res = await run_agent_helper(RoutinePlannerAgent, planner_query)
+    routine_res = await run_agent_helper(RoutinePlannerAgent, planner_query, image_data)
     session_context["routine_plan"] = routine_res
     
     combined = (
@@ -234,26 +244,26 @@ async def full_routine_flow(query: str) -> str:
     )
     return combined
 
-# Define the Jamalak Orchestrator Agent
-JamalakOrchestrator = Agent(
-    name="JamalakOrchestrator",
-    description="Jamalak's LLM beauty concierge orchestrator.",
+# Define the Jamalek Orchestrator Agent
+JamalekOrchestrator = Agent(
+    name="JamalekOrchestrator",
+    description="Jamalek's LLM beauty concierge orchestrator.",
     model="gemini-2.5-flash",
     instruction=(
-        "You are Jamalak, a full-face beauty LLM concierge. You help users with skincare and makeup together. "
+        "You are Jamalek, a full-face beauty LLM concierge. You help users with skincare and makeup together. "
         "You route requests to the right specialist and combine their outputs into one clear helpful response. "
         "Use the provided tools to call the specialized agents based on routing rules:\n"
         "- For skin type, concerns, breakouts, ingredients, or skincare advice → call analyze_skin\n"
         "- For foundation shade, undertone, concealer, or color matching → call match_shade\n"
         "- For dupes, cheaper alternatives, ingredient conflicts, or product suitability → call research_product\n"
         "- For full routines, application order, AM/PM routine → call full_routine_flow\n"
-        "- For anything else → answer directly as Jamalak without calling any sub-agent."
+        "- For anything else → answer directly as Jamalek without calling any sub-agent."
     ),
     tools=[analyze_skin, match_shade, research_product, full_routine_flow]
 )
 
 # Export as root_agent so ADK CLI can run/load it
-root_agent = JamalakOrchestrator
+root_agent = JamalekOrchestrator
 
 def merge_profile_updates(current: SkinProfile, updates: dict) -> SkinProfile:
     """Merges new profile updates dict into current SkinProfile object."""
@@ -358,8 +368,8 @@ def check_routing_intent(user_input_lower: str):
         return False, False, False, True
     return is_routine, is_shade, is_skin, is_dupe
 
-async def process_message(user_input: str) -> str:
-    """Routes and executes user input against the appropriate sub-agents or directly via Jamalak."""
+async def process_message(user_input: str, image_data: dict = None) -> str:
+    """Routes and executes user input against the appropriate sub-agents or directly via Jamalek."""
     user_input_strip = user_input.strip()
     user_input_lower = user_input_strip.lower()
     
@@ -401,13 +411,13 @@ async def process_message(user_input: str) -> str:
     is_routine, is_shade, is_skin, is_dupe = check_routing_intent(user_input_lower)
     
     if is_routine:
-        res = await full_routine_flow(user_input)
+        res = await full_routine_flow(user_input, image_data)
     elif is_shade:
-        res = await match_shade(user_input)
+        res = await match_shade(user_input, image_data)
     elif is_skin:
-        res = await analyze_skin(user_input)
+        res = await analyze_skin(user_input, image_data)
     elif is_dupe:
-        res = await research_product(user_input)
+        res = await research_product(user_input, image_data)
     else:
         import google.generativeai as genai
         genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
@@ -415,11 +425,21 @@ async def process_message(user_input: str) -> str:
         profile = load_profile()
         context_str = get_context_string(profile)
         prompt = (
-            "You are Jamalak, a full-face beauty LLM concierge. You help users with skincare and makeup together. "
+            "You are Jamalek, a full-face beauty LLM concierge. You help users with skincare and makeup together. "
             f"\n{context_str}\n\n"
             "Provide a direct response to: " + user_input
         )
-        response = model.generate_content(prompt)
+        contents = [prompt]
+        if image_data:
+            import base64
+            b64_content = image_data["data"]
+            if "," in b64_content:
+                b64_content = b64_content.split(",", 1)[1]
+            contents.append({
+                "mime_type": image_data["mime"],
+                "data": base64.b64decode(b64_content)
+            })
+        response = model.generate_content(contents)
         res = response.text
 
     # 6. Extract any new profile facts and ask for consent

@@ -1277,9 +1277,16 @@
             </div>
 
             <div class="bottom-container">
+                <!-- Image Preview Container -->
+                <div id="imagePreviewContainer" style="display: none; position: relative; padding: 10px; margin-bottom: 8px; background: rgba(250, 242, 234, 0.9); border-radius: 8px; border: 1px dashed var(--border-soft); align-self: flex-start; margin-left: 20px; box-shadow: var(--shadow-sm);">
+                    <img id="imagePreview" src="" style="max-height: 80px; border-radius: 6px; object-fit: cover;" />
+                    <button onclick="removeAttachedImage()" style="position: absolute; top: -5px; right: -5px; background: var(--header-plum); color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold;">&times;</button>
+                </div>
+
                 <div class="input-panel">
+                    <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleFileSelect(event)" />
                     <!-- Left Add/Attach Icon matching Gemini -->
-                    <button class="input-utility-btn" title="Add attachments">
+                    <button class="input-utility-btn" title="Add attachments" onclick="document.getElementById('fileInput').click()">
                         <svg viewBox="0 0 24 24">
                             <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
                         </svg>
@@ -1311,6 +1318,31 @@
         const sidebar = document.getElementById('sidebar');
         const geminiGlow = document.getElementById('geminiGlow');
         const cosmeticSpace = document.getElementById('cosmeticSpace');
+
+        let attachedImage = null;
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    attachedImage = {
+                        mime: file.type,
+                        data: e.target.result
+                    };
+                    document.getElementById('imagePreview').src = e.target.result;
+                    document.getElementById('imagePreviewContainer').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function removeAttachedImage() {
+            attachedImage = null;
+            document.getElementById('imagePreview').src = '';
+            document.getElementById('imagePreviewContainer').style.display = 'none';
+            document.getElementById('fileInput').value = '';
+        }
 
         // Toggle Sidebar state
         function toggleSidebar() {
@@ -1554,13 +1586,19 @@
             // Show typing indicator
             const typingId = showTypingIndicator();
 
+            const payload = { message: text };
+            if (attachedImage) {
+                payload.image = attachedImage;
+                removeAttachedImage();
+            }
+
             try {
                 const response = await fetch('/chat', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ message: text }),
+                    body: JSON.stringify(payload),
                 });
 
                 const data = await response.json();
