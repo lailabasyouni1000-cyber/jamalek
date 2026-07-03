@@ -1,18 +1,15 @@
-# Jamalek Security and Data Privacy
+# Jamalek Data Security and Privacy
 
-I set up the security controls in this project to make sure user data is handled safely and that users have full control over what is saved. The main rules the project follows are:
+I set up the security controls in this project to make sure user data is handled safely and to give users full control over what is saved. The main rules the project follows are:
 
-## 1. How Selfies are Handled
-When you upload a selfie or skin photo, the image is passed directly to the Gemini API for analysis (like finding your undertone). The raw image file is processed in memory and never written to disk, which means it is never saved locally or committed to GitHub. The agent only returns the resulting text classification to the chat session.
+## How Selfies are Handled
+When the agent analyzes a selfie or skin photo, it doesn't store the raw image. It just sends the image to the model to check things like undertone and skin concerns. The file is kept in memory during the call and never written to disk, so it's never stored locally or pushed to GitHub. The only thing the chat session gets back is the text result.
 
-## 2. Consent Gate for Profile Updates
-Before any new facts (like your skin type, triggers, or products you own) are saved to your local profile, the orchestrator stops and asks you for permission. If you type "no", the update is used for the current session only and is discarded when the session ends.
+## Consent Gate for Profile Updates
+The system uses a consent gate before saving new facts. If you tell the bot you have dry skin or bought a new moisturizer, the orchestrator won't save it to your profile without asking first. If you say no, the bot will use that detail for the current chat session but won't write it to your profile, and the information disappears when the session ends.
 
-## 3. Deleting Your Profile
-You can completely delete your saved profile at any time. Typing "delete my profile" will trigger a confirmation prompt asking you to type "DELETE". Once you do, the code removes `user_profile.json` and clears any pending session state from the disk.
+## Deleting Your Profile
+If you want to clear your data, you can delete your profile by typing "delete my profile". The code will ask you to confirm by typing "DELETE" in all caps. Once you confirm, the script deletes your user profile and clears the session state file.
 
-## 4. Protecting Secrets and Profile Data
-I added a `.gitignore` file to prevent sensitive configurations and personal data from being committed to Git. The ignored paths include:
-- The `.env` file (which holds your API keys)
-- The `.venv/` folder (local python environments)
-- The `data/user_profile.json` and `data/pending_state.json` files (your saved skin profiles and temporary session state)
+## Protecting Secrets and Profile Data
+To make sure no keys or profiles get committed to Git, the project uses a .gitignore file. This prevents files like the .env configuration, the local virtual environment, and the local profile store from ever being pushed to the remote repository.
