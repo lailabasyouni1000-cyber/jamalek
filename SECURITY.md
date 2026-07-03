@@ -1,15 +1,9 @@
 # Jamalek Data Security and Privacy
 
-I set up the security controls in this project to make sure user data is handled safely and to give users full control over what is saved. The main rules the project follows are:
+I set up the data and privacy rules in this project to make sure your information is handled safely. 
 
-## How Selfies are Handled
-When the agent analyzes a selfie or skin photo, it doesn't store the raw image. It just sends the image to the model to check things like undertone and skin concerns. The file is kept in memory during the call and never written to disk, so it's never stored locally or pushed to GitHub. The only thing the chat session gets back is the text result.
+If you upload a selfie, the bot doesn't save the image file anywhere. It just sends the image to the model to check things like your skin undertone. The file is kept in memory during the API call and never written to the disk, which prevents it from being stored locally or pushed to GitHub. The chat session only receives the text results.
 
-## Consent Gate for Profile Updates
-The system uses a consent gate before saving new facts. If you tell the bot you have dry skin or bought a new moisturizer, the orchestrator won't save it to your profile without asking first. If you say no, the bot will use that detail for the current chat session but won't write it to your profile, and the information disappears when the session ends.
+The app also uses a consent gate before saving any new facts to your profile. If you tell the bot you have dry skin or that you bought a new product, the code won't write it to your profile unless you type yes. If you say no, the bot will use the details for the current chat session but won't save them, and the information is cleared when you close the session.
 
-## Deleting Your Profile
-If you want to clear your data, you can delete your profile by typing "delete my profile". The code will ask you to confirm by typing "DELETE" in all caps. Once you confirm, the script deletes your user profile and clears the session state file.
-
-## Protecting Secrets and Profile Data
-To make sure no keys or profiles get committed to Git, the project uses a .gitignore file. This prevents files like the .env configuration, the local virtual environment, and the local profile store from ever being pushed to the remote repository.
+If you want to clear your data completely, you can type "delete my profile". The bot will ask you to confirm by typing "DELETE" in all caps. Once you do, the script removes the profile file and clears the session state. I also added a .gitignore file to prevent your local configurations, keys, and profile files from ever getting pushed to GitHub.
