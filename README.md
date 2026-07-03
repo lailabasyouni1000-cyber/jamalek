@@ -50,65 +50,67 @@ The capstone needs at least three concepts from the course. Jamalek uses five in
 
 ## Running it
 
-Needs Python 3.10+ and a Gemini API key from AI Studio. Keys go in environment variables. Nothing sensitive is committed.
+Needs Python 3.10+ and a Gemini API key from AI Studio. Keys go in environment variables.
 
 ```bash
-git clone https://github.com/<you>/jamalek.git
+git clone https://github.com/lailabasyouni1000-cyber/jamalek.git
 cd jamalek
 
-python -m venv .venv && source .venv/bin/activate
+python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
 export GEMINI_API_KEY="your-key-here"
+export GOOGLE_API_KEY="your-key-here"
 
-# start the MCP product server
-python mcp_server/server.py
-
-# run the agent
-adk web            # ADK dev UI
-# or: adk run shade_concierge
+# start the Flask web application (automatically hosts orchestrator and triggers MCP tool subprocesses)
+python app.py
 ```
 
-Upload a selfie or describe your skin, and the root agent takes it from there.
+Drag and drop a selfie or tell Jamalek about your skin to get started!
 
-## Deploying (optional)
+## Deploying
 
 ```bash
 gcloud run deploy jamalek \
   --source . \
   --region us-central1 \
   --allow-unauthenticated \
-  --set-env-vars GEMINI_API_KEY=$GEMINI_API_KEY
+  --set-env-vars GEMINI_API_KEY=$GEMINI_API_KEY,GOOGLE_API_KEY=$GOOGLE_API_KEY
 ```
 
-The key is passed in at runtime, never baked into the image.
+The key is passed in at runtime, never baked into the container.
 
 ## Layout
 
 ```
 jamalek/
-├── agents/             # root orchestrator & sub-agents
+├── agents/             # Root orchestrator & sub-agents
 │   ├── orchestrator.py
 │   ├── skin_analyst.py
 │   ├── shade_matcher.py
 │   ├── routine_planner.py
 │   └── product_researcher.py
-├── mcp_server.py       # read-only catalog tool
-├── memory.py           # profile and memory logic
-├── templates/          # web frontend
-│   └── index.html
-├── data/
+├── data/               # Product catalog database
 │   └── products.json
-├── skills/             # SKILL.md per capability
-├── Dockerfile
-├── SECURITY.md
+├── skills/             # Instruction skills loaded by agents
+│   ├── product_researcher.md
+│   ├── routine_planner.md
+│   ├── shade_matcher.md
+│   └── skin_analyst.md
+├── templates/          # Web frontend template
+│   └── index.html
+├── app.py              # Main Flask application
+├── mcp_server.py       # Catalog query tool (Stdio MCP server)
+├── memory.py           # Profile loading and saving logic
+├── Dockerfile          # Container specification
+├── SECURITY.md         # Data privacy and safety statement
 ├── README.md
 └── requirements.txt
 ```
 
 ## Security
 
-Selfies aren't stored, only the undertone label they produce. Anything that writes to memory or looks like a purchase asks you first. Details are in `SECURITY.md`.
+Selfies are processed purely in-memory and are never stored on disk. Anything that updates your profile asks you for consent first (consent gate). Details are in [SECURITY.md](file:///Users/lailabasyouni/.gemini/antigravity/scratch/jamalak/SECURITY.md).
 
 ## Demo
 
