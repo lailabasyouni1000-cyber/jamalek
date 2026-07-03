@@ -1569,7 +1569,21 @@
                 if (data.error) {
                     appendMessage('agent', `An error occurred: ${data.error}`);
                 } else {
-                    appendMessage('agent', data.response);
+                    const content = data.response;
+                    const marker = "[Jamalek]:";
+                    if (content.includes(marker)) {
+                        const parts = content.split(marker);
+                        const mainPart = parts[0].trim();
+                        const consentPart = parts[1].trim();
+                        if (mainPart) {
+                            appendMessage('agent', mainPart);
+                        }
+                        setTimeout(() => {
+                            appendMessage('agent', `✨ **Jamalek**: ${consentPart}`);
+                        }, 800);
+                    } else {
+                        appendMessage('agent', content);
+                    }
                 }
             } catch (err) {
                 removeTypingIndicator(typingId);

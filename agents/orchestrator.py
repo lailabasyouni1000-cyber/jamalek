@@ -428,7 +428,7 @@ async def process_message(user_input: str) -> str:
     if new_updates:
         save_pending_state({"pending_profile": new_updates})
         learned_facts_str = format_learned_facts(new_updates)
-        res += f"\n\n[Jamalak]: I'd like to save {learned_facts_str} to your profile so I remember it next time. Save this? (yes/no)"
+        res += f"\n\n[Jamalek]: I'd like to save {learned_facts_str} to your profile so I remember it next time. Save this? (yes/no)"
         
     return res
 
