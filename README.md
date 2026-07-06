@@ -19,17 +19,19 @@ The backend uses a root coordinator that passes requests to four specialized age
 ```mermaid
 graph TD
     User([User]) -->|Selfie / Request| Root[Root Orchestrator]
+    Root -->|Delegate| SA[Skin Analyst]
     Root -->|Delegate| SM[Shade Matcher]
-    Root -->|Delegate| SP[Skin / Routine Planner]
+    Root -->|Delegate| RP[Routine Planner]
     Root -->|Delegate| PR[Product Researcher]
-    
-    SM <-->|Read / Write| Profile[(Beauty Profile)]
-    SP <-->|Read / Write| Profile
+
+    SA <-->|Read / Write| Profile[(Beauty Profile)]
+    SM <-->|Read / Write| Profile
+    RP <-->|Read / Write| Profile
     PR <-->|Read / Write| Profile
-    
+
     Profile <-->|Session & Memory| MB[Memory Bank]
-    
-    PR <-->|Query| MCP[MCP Server]
+
+    PR <-->|Query| MCP[MCP Server -> local catalog]
 ```
 
 A root agent decides which specialist to hand off to. The sub-agents share one beauty profile that lives in ADK's session state, with Memory Bank holding the long-term parts. Product data comes in through a read-only MCP server, so the agent can't reach past the catalog.
@@ -102,7 +104,7 @@ jamalek/
 
 ## Security
 
-Selfies are processed purely in-memory and are never stored on disk. Anything that updates your profile asks you for consent first (consent gate). Details are in [SECURITY.md](file:///Users/lailabasyouni/.gemini/antigravity/scratch/jamalak/SECURITY.md).
+Selfies are processed purely in-memory and are never stored on disk. Anything that updates your profile asks you for consent first (consent gate). Details are in [SECURITY.md](SECURITY.md).
 
 ## Demo
 
