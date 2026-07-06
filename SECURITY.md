@@ -1,19 +1,19 @@
-# Security & Privacy — Jamalek
+# Security & Privacy for Jamalek
 
 Jamalek is a beauty assistant, so it handles two kinds of sensitive data: **selfies** and a
 **beauty profile** (undertone, product inventory, skin sensitivities, and history). Because
-that's personal, privacy is treated as a design constraint, not an afterthought in line
+that's personal, privacy is treated as a design constraint, not an afterthought, in line
 with the Concierge track's requirement to keep personal information safe.
 
 ## Data handling principles
 
 1. **Selfies are ephemeral.** Uploaded photos are processed entirely in memory for a single
    analysis pass and are **never written to disk**. Only the derived, non-identifying result
-   — e.g. `undertone: warm`, `concern: dryness` — is saved to your profile. The image itself
+   (for example `undertone: warm`, `concern: dryness`) is saved to your profile. The image itself
    is discarded once the turn completes.
 2. **Minimize what persists.** The profile stores derived attributes and product inventory,
    not raw biometric or image data. A leaked profile reveals "warm undertone, owns two
-   foundations, fragrance-sensitive" — not a face.
+   foundations, fragrance-sensitive," not a face.
 3. **Consent before writing.** When Jamalek extracts a new fact about you mid-conversation,
    it asks for permission before saving it to your profile (the **consent gate**). It
    proposes; you decide.
@@ -24,7 +24,7 @@ with the Concierge track's requirement to keep personal information safe.
 
 | Data | Persisted? | Where | Notes |
 |---|---|---|---|
-| Raw selfie / uploaded image | **No** | — | In memory only, discarded after analysis |
+| Raw selfie / uploaded image | **No** | (none) | In memory only, discarded after analysis |
 | Derived undertone / skin concerns | Yes | Beauty profile | Non-identifying; consent-gated |
 | Product inventory | Yes | Beauty profile | Editable / removable by the user |
 | Sensitivities & reaction history | Yes | Beauty profile | Used to avoid recommending irritants |
@@ -40,7 +40,7 @@ with the Concierge track's requirement to keep personal information safe.
 
 ## Secrets management
 
-- `GEMINI_API_KEY` and `GOOGLE_API_KEY` are read from **environment variables at runtime** —
+- `GEMINI_API_KEY` and `GOOGLE_API_KEY` are read from **environment variables at runtime**,
   never hard-coded, never committed.
 - Local profile stores and any `.env` files are excluded from version control.
 - On Cloud Run, keys are injected as runtime environment variables via `--set-env-vars`,
