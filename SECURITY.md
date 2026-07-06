@@ -2,7 +2,7 @@
 
 Jamalek is a beauty assistant, so it handles two kinds of sensitive data: **selfies** and a
 **beauty profile** (undertone, product inventory, skin sensitivities, and history). Because
-that's personal, privacy is treated as a design constraint, not an afterthought — in line
+that's personal, privacy is treated as a design constraint, not an afterthought in line
 with the Concierge track's requirement to keep personal information safe.
 
 ## Data handling principles
