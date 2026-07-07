@@ -63,8 +63,4 @@ prompt-injection attempt tries to steer a tool call.
 | Credential leakage via source control | Keys in env vars only; excluded from version control |
 | Prompt injection steering tool calls | Narrow, read-only MCP surface over a local catalog |
 
----
 
-*This is a hackathon capstone project. The posture above reflects the design as built; a
-production deployment would add authenticated per-user isolation, encryption at rest for the
-profile store, and audit logging.*
