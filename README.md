@@ -2,7 +2,7 @@
 <img width="1183" height="701" alt="Jamalek" src="https://github.com/user-attachments/assets/db7dabfb-5ce2-41e3-8cd7-521494295017" />
 Jamalek ("your beauty" in Arabic) is a stateful, multi-agent beauty assistant. You drag in a selfie and ask about your skin, and it reads your undertone, matches you to products at every price point, and remembers you between sessions.
  
-- **Live demo:** https://jamalek-724220720710.us-central1.run.app
+- **link:** https://jamalek-724220720710.us-central1.run.app
 - **Track:** Concierge Agents
 ## Why I built it
  
